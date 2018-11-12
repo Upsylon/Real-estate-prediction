@@ -37,72 +37,72 @@ Is the path allowed?
 ```{r}
 paths_allowed(paste(paths="/en/real-estate/rent/city/",cities, sep=""), domain="https://www.immoscout24.ch")
 ```
-
 --> Yes 
+
+
 
 LOOPING OVER EACH CITY
 
-<!-- Pasring the HTML file in new variables linked to each cities: -->
-
-<!-- ```{r} -->
-<!-- for (i in 1:length(cities)){ -->
-<!-- assign(paste("immoscout_", cities[i], sep=""), read_html(paste("https://www.immoscout24.ch/en/real-estate/rent/city-", cities[i], sep=""))) -->
-<!--   } -->
-<!-- ``` -->
-
-
-
-<!-- Getting the prices with the "Selector Gadget": -->
-
-<!-- ```{r} -->
-<!-- # .fFoWRd --> the prices -->
-<!-- # .ehLwuE --> the nb of rooms and the surface  -->
-<!-- # .gDVamO .fUZwLT --> the address -->
-<!-- # .kEhyoM .ehLwuE , .fFoWRd, gDVamO .fUZwLT--> all combined without other perturbating lements -->
-<!-- ``` -->
-
-<!-- ```{r} -->
-<!-- for (i in 1:length(cities)){ -->
-<!-- assign(paste("characs_", cities[i], sep=""), paste("immoscout_", cities[i], sep="")  %>% get %>% -->
-<!--     html_nodes(".kEhyoM .ehLwuE , .fFoWRdg, DVamO .fUZwLT") %>% -->
-<!--     html_text()) -->
-<!-- } -->
-<!-- ``` -->
-
-
-
-
-LOOPING OVER EACH PAGE 
+Getting the URL of each cities in new variables linked to each of them:
 
 ```{r}
-url_immoscout <- paste0("https://www.immoscout24.ch/en/real-estate/rent/city-basel")
+for (i in 1:length(cities)){
+assign(paste("url_immoscout_", cities[i], sep=""), paste("https://www.immoscout24.ch/en/real-estate/rent/city-", cities[i], sep=""))
+  }
 ```
 
+
+Getting the prices with the "Selector Gadget":
+
 ```{r}
-pages_immoscout <- read_html(x = url_immoscout) %>%
+# .fFoWRd --> the prices
+# .ehLwuE --> the nb of rooms and the surface
+# .gDVamO .fUZwLT --> the address
+# .gDVamO .fUZwLT , .kEhyoM .ehLwuE, .fFoWRd --> all combined without other perturbating lements
+```
+
+Getting the number of pages for each city in order to loop over them afterwards.
+```{r}
+for (i in 1:length(cities)){
+assign(paste("pages_immoscout_", cities[i], sep=""), 
+       read_html(x = paste("url_immoscout_", cities[i], sep="")  %>% get) %>%
   html_nodes(css = ".cXTlXt") %>% ## obtained with selector gadget
   html_text() %>%
   as.numeric() %>%
   max(na.rm = TRUE) %>%
   subtract(e2 = 1) %>%
-  seq(from = 0)
-```
-
-```{r}
-prices_immoscout <- list()
-
-for (page in pages_immoscout) {
-  url_path_immoscout <-
-    paste0("https://www.immoscout24.ch/en/real-estate/rent/city-basel?pn=",
-           page)
-  
-  prices[[pages_immoscout + 1]] <- read_html(url_path_immoscout) %>%
-    html_nodes(".fFoWRd") %>%
-    html_text() %>%
-    substring(first = 5) %>%
-    gsub(pattern = ".<U+2014>", replacement = "") ## doesn't work with these .<U+2014>...
+  seq(from = 1))
 }
-
 ```
 
+Creating empty lists to store the prices:
+```{r}
+# for (i in 1:length(cities)){
+# assign(paste("prices_immoscout_", cities[i], sep=""), list()
+#        )
+# }
+```
 
+Looping over cities and pages to get all prices for all cities
+```{r}
+for (i in 1:length(cities)){
+  for (page in paste("pages_immoscout_", cities[i], sep="") %>% get){
+       url_path_page_immoscout <- paste("https://www.immoscout24.ch/en/real-estate/rent/city-", cities[i], sep="") %>% 
+             paste("?pn=", page, sep="")
+
+## doesnt work...
+assign(paste("prices_immoscout_", cities[i], sep="") %>% paste("_page_", page, sep="") , read_html(url_path_page_immoscout) %>% 
+  html_nodes(".fFoWRd") %>%
+  html_text())
+  }
+}
+```
+
+getting the elements of interest (price, title) for each city (only the 1st page)
+```{r}
+# for (i in 1:length(cities)){
+# assign(paste("characs_", cities[i], sep=""), paste("url_immoscout_", cities[i], sep="")  %>% get %>%
+#     html_nodes(".gDVamO .fUZwLT , .kEhyoM .ehLwuE, .fFoWRd") %>%
+#     html_text())
+# }
+```
