@@ -7,3 +7,102 @@ output:
     theme: cerulean
     highlight: tango
 ---
+
+```{r}
+library(robotstxt)
+library(xml2)
+library(rvest)
+library(magrittr)
+```
+
+
+
+
+
+
+# Webscrapping
+
+Cities of interest.
+
+```{r}
+cities <- c("Zurich", "Geneve", "Basel", "Lausanne", "Bern", "Winterthur", "Lucerne", "Lugano")
+```
+
+
+
+## Immoscout
+
+Is the path allowed? 
+
+```{r}
+paths_allowed(paste(paths="/en/real-estate/rent/city/",cities, sep=""), domain="https://www.immoscout24.ch")
+```
+
+--> Yes 
+
+LOOPING OVER EACH CITY
+
+<!-- Pasring the HTML file in new variables linked to each cities: -->
+
+<!-- ```{r} -->
+<!-- for (i in 1:length(cities)){ -->
+<!-- assign(paste("immoscout_", cities[i], sep=""), read_html(paste("https://www.immoscout24.ch/en/real-estate/rent/city-", cities[i], sep=""))) -->
+<!--   } -->
+<!-- ``` -->
+
+
+
+<!-- Getting the prices with the "Selector Gadget": -->
+
+<!-- ```{r} -->
+<!-- # .fFoWRd --> the prices -->
+<!-- # .ehLwuE --> the nb of rooms and the surface  -->
+<!-- # .gDVamO .fUZwLT --> the address -->
+<!-- # .kEhyoM .ehLwuE , .fFoWRd, gDVamO .fUZwLT--> all combined without other perturbating lements -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- for (i in 1:length(cities)){ -->
+<!-- assign(paste("characs_", cities[i], sep=""), paste("immoscout_", cities[i], sep="")  %>% get %>% -->
+<!--     html_nodes(".kEhyoM .ehLwuE , .fFoWRdg, DVamO .fUZwLT") %>% -->
+<!--     html_text()) -->
+<!-- } -->
+<!-- ``` -->
+
+
+
+
+LOOPING OVER EACH PAGE 
+
+```{r}
+url_immoscout <- paste0("https://www.immoscout24.ch/en/real-estate/rent/city-basel")
+```
+
+```{r}
+pages_immoscout <- read_html(x = url_immoscout) %>%
+  html_nodes(css = ".cXTlXt") %>% ## obtained with selector gadget
+  html_text() %>%
+  as.numeric() %>%
+  max(na.rm = TRUE) %>%
+  subtract(e2 = 1) %>%
+  seq(from = 0)
+```
+
+```{r}
+prices_immoscout <- list()
+
+for (page in pages_immoscout) {
+  url_path_immoscout <-
+    paste0("https://www.immoscout24.ch/en/real-estate/rent/city-basel?pn=",
+           page)
+  
+  prices[[pages_immoscout + 1]] <- read_html(url_path_immoscout) %>%
+    html_nodes(".fFoWRd") %>%
+    html_text() %>%
+    substring(first = 5) %>%
+    gsub(pattern = ".<U+2014>", replacement = "") ## doesn't work with these .<U+2014>...
+}
+
+```
+
+
