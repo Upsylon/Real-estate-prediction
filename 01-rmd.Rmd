@@ -21,16 +21,18 @@ library(magrittr)
 Cities of interest.
 
 ```{r}
-cities <- c("Zurich", "Geneve", "Basel", "Lausanne", "Bern", "Winterthur", "Lucerne", "Lugano")
+cities <- c("Zurich", "Geneve", "Basel", "Lausanne", "Bern",
+            "Winterthur", "Lucerne", "Lugano")
 ```
 
 
 ## Immoscout
 
-Is the path allowed? 
+Is the path allowed for each city? 
 
 ```{r}
-paths_allowed(paste(paths="/en/real-estate/rent/city/",cities, sep=""), domain="https://www.immoscout24.ch")
+paths_allowed(paste(paths="/en/real-estate/rent/city/",cities, sep=""),
+              domain="https://www.immoscout24.ch")
 get_robotstxt(domain="https://www.immoscout24.ch")
 ```
 --> Yes 
@@ -82,16 +84,18 @@ Looping over cities and pages to get all prices for all cities
 ```{r}
 for (i in 1:length(cities)){
   for (page in paste("pages_immoscout_", cities[i], sep="") %>% get){
-       url_path_page_immoscout <- paste("https://www.immoscout24.ch/en/real-estate/rent/city-", cities[i], sep="") %>% 
-             paste("?pn=", page, sep="")
+    url_path_page_immoscout <- paste("https://www.immoscout24.ch/en/real-estate/rent/city-",
+      cities[i], sep="") %>% 
+    paste("?pn=", page, sep="")
 
 ## doesnt work...
-assign(paste("prices_immoscout_", cities[i], sep="") %>% paste("_page_", page, sep="") , read_html(url_path_page_immoscout) %>% 
+assign(paste("prices_immoscout_", cities[i], sep="") %>% paste("_page_", page, sep=""), read_html(url_path_page_immoscout) %>% 
   html_nodes(".fFoWRd") %>%
   html_text())
   }
 }
 ```
+
 
 getting the elements of interest (price, title) for each city (only the 1st page)
 ```{r}
