@@ -16,10 +16,6 @@ library(magrittr)
 ```
 
 
-
-
-
-
 # Webscrapping
 
 Cities of interest.
@@ -29,16 +25,15 @@ cities <- c("Zurich", "Geneve", "Basel", "Lausanne", "Bern", "Winterthur", "Luce
 ```
 
 
-
 ## Immoscout
 
 Is the path allowed? 
 
 ```{r}
 paths_allowed(paste(paths="/en/real-estate/rent/city/",cities, sep=""), domain="https://www.immoscout24.ch")
+get_robotstxt(domain="https://www.immoscout24.ch")
 ```
 --> Yes 
-
 
 
 LOOPING OVER EACH CITY
