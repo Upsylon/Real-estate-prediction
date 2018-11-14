@@ -21,37 +21,46 @@ library(magrittr)
 Example data structure de Iegor a rearranger
 
 ```{r}
-list(
-  lausanne = list(
-    page1 = c(12, 12, 1213),
-    page2 
-  ),
-  basel 
-)
+cities <- list(
+  zurich = list(),
+  geneve = list(),
+  basel = list(),
+  lausanne = list(),
+  bern = list(),
+  winterthur = list(),
+  lucerne = list(),
+  lugano = list()
+  )
 
-# lausanne
+# list(
+#   zurich = list(page1 = c(12, 12, 1213),
+#     page2 = c(1222, 12, 1213)),
+#   geneva = list()
+# )
+    
 
-page1 <- c(12, 13, 14)
-attr(x = page1, which = "url") <- "http..."
-
-
-page2 <- c(11, 13, 14)
-attr(x = page2, which = "url") <- "http...2"
-
-prices <- list(
-  lausanne = list(page1, page2),
-  basel = list(page1, page2)
-)
-
-prices
+# # lausanne
+# page1 <- c(12, 13, 14)
+# attr(x = page1, which = "url") <- "http..."
+# 
+# 
+# page2 <- c(11, 13, 14)
+# attr(x = cities$zurich$page2, which = "url") <- "http...2"
+# 
+# prices <- list(
+#   lausanne = list(page1, page2),
+#   basel = list(page1, page2)
+# )
+# 
+# prices
 ```
 
 
 Cities of interest.
 
 ```{r}
-cities <- c("Zurich", "Geneve", "Basel", "Lausanne", "Bern",
-            "Winterthur", "Lucerne", "Lugano")
+# cities2 <- c("Zurich", "Geneve", "Basel", "Lausanne", "Bern",
+#             "Winterthur", "Lucerne", "Lugano")
 ```
 
 
@@ -72,11 +81,17 @@ LOOPING OVER EACH CITY
 Getting the URL of each cities in new variables linked to each of them:
 
 ```{r}
-for (i in 1:length(cities)){
-assign(paste("url_immoscout_", cities[i], sep=""), paste("https://www.immoscout24.ch/en/real-estate/rent/city-", cities[i], sep=""))
-  }
+# for (i in 1:length(cities)){
+# assign(paste("url_immoscout_", cities2[i], sep=""), paste("https://www.immoscout24.ch/en/real-estate/rent/city-", cities2[i], sep=""))
+#   }
 ```
 
+```{r}
+for (i in 1:length(cities)){
+  attr(cities[[i]], which="url") <- paste("https://www.immoscout24.ch/en/real-estate/rent/city-", names(cities[i]), sep="") 
+}
+
+```
 
 Getting the prices with the "Selector Gadget":
 
@@ -87,41 +102,56 @@ Getting the prices with the "Selector Gadget":
 # .gDVamO .fUZwLT , .kEhyoM .ehLwuE, .fFoWRd --> all combined without other perturbating lements
 ```
 
-Getting the number of pages for each city in order to loop over them afterwards.
+
 ```{r}
-for (i in 1:length(cities)){
-assign(paste("pages_immoscout_", cities[i], sep=""), 
-       read_html(x = paste("url_immoscout_", cities[i], sep="")  %>% get) %>%
-  html_nodes(css = ".cXTlXt") %>% ## obtained with selector gadget
+pages <- list()
+for( i in 1:length(cities)){
+  pages[[i]] <- read_html(x = paste0(unlist(attributes(cities[[i]]),use.names=FALSE))) %>%
+  html_nodes(css = ".cXTlXt") %>%
   html_text() %>%
   as.numeric() %>%
   max(na.rm = TRUE) %>%
   subtract(e2 = 1) %>%
-  seq(from = 1))
+  seq(from = 0) 
 }
-```
-
-Creating empty lists to store the prices:
-```{r}
-# for (i in 1:length(cities)){
-# assign(paste("prices_immoscout_", cities[i], sep=""), list()
-#        )
-# }
 ```
 
 Looping over cities and pages to get all prices for all cities
 ```{r}
-for (i in 1:length(cities)){
-  for (page in paste("pages_immoscout_", cities[i], sep="") %>% get){
-    url_path_page_immoscout <-
-      paste("https://www.immoscout24.ch/en/real-estate/rent/city-",
-      cities[i], sep="") %>% 
-    paste("?pn=", page, sep="")
+# for (i in 1:length(cities2)){
+#   for (page in paste("pages_immoscout_", cities2[i], sep="") %>% get){
+#     url_path_page_immoscout <-
+#       paste("https://www.immoscout24.ch/en/real-estate/rent/city-",
+#       cities2[i], sep="") %>% 
+#     paste("?pn=", page, sep="")
+# 
+# ## doesnt work...
+# assign(paste("prices_immoscout_", cities2[i], sep="") %>% paste("_page_", page, sep=""), read_html(url_path_page_immoscout) %>% 
+#   html_nodes(".fFoWRd") %>%
+#   html_text())
+#   }
+# }
+```
 
-## doesnt work...
-assign(paste("prices_immoscout_", cities[i], sep="") %>% paste("_page_", page, sep=""), read_html(url_path_page_immoscout) %>% 
-  html_nodes(".fFoWRd") %>%
-  html_text())
+```{r}
+for (i in 1:length(cities)){
+  for (page in 1:10){  ## on veut le nb de page, mais for (page in pages[[i]]) marche pas --> a corriger
+    url_path_page_immoscout <- cities[[i]] %>% 
+      attributes %>% 
+      unlist(use.names=FALSE) %>% 
+      paste0 %>%
+      paste("?pn=", page, sep="") 
+      
+    cities[[i]][[page]] <- list()
+     cities[[i]][[page]] <- read_html(url_path_page_immoscout) %>% 
+      html_nodes(".fFoWRd") %>%
+      html_text() %>% 
+       cbind %>% 
+       as.vector %>% 
+       gsub(".\u2014","",.) %>% # substracting disturbing elements
+       gsub("CHF ","",.) %>% 
+       gsub(",","",.) %>% 
+       as.numeric
   }
 }
 ```
