@@ -93,14 +93,6 @@ for (i in 1:length(cities)){
 
 ```
 
-Getting the prices with the "Selector Gadget":
-
-```{r}
-# .fFoWRd --> the prices
-# .ehLwuE --> the nb of rooms and the surface
-# .gDVamO .fUZwLT --> the address
-# .gDVamO .fUZwLT , .kEhyoM .ehLwuE, .fFoWRd --> all combined without other perturbating lements
-```
 
 
 ```{r}
@@ -112,7 +104,7 @@ for( i in 1:length(cities)){
   as.numeric() %>%
   max(na.rm = TRUE) %>%
   subtract(e2 = 1) %>%
-  seq(from = 0) 
+  seq(from = 1) 
 }
 ```
 
@@ -133,9 +125,18 @@ Looping over cities and pages to get all prices for all cities
 # }
 ```
 
+Getting the prices with the "Selector Gadget":
+
+```{r}
+# .fFoWRd --> the prices
+# .ehLwuE --> the nb of rooms and the surface
+# .gDVamO .fUZwLT --> the address
+# .gDVamO .fUZwLT , .kEhyoM .ehLwuE, .fFoWRd --> all combined without other perturbating lements
+```
+
 ```{r}
 for (i in 1:length(cities)){
-  for (page in 1:10){  ## on veut le nb de page, mais for (page in pages[[i]]) marche pas --> a corriger
+  for (page in pages[[i]]){  
     url_path_page_immoscout <- cities[[i]] %>% 
       attributes %>% 
       unlist(use.names=FALSE) %>% 
