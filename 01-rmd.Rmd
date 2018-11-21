@@ -13,6 +13,7 @@ library(robotstxt)
 library(xml2)
 library(rvest)
 library(magrittr)
+library(stringr)
 ```
 
 
@@ -20,7 +21,7 @@ library(magrittr)
 
 Example data structure de Iegor a rearranger
 
-```{r}
+```{r eval=FALSE}
 cities <- list(
   zurich = list(),
   geneve = list(),
@@ -31,15 +32,15 @@ cities <- list(
   lucerne = list(),
   lugano = list()
   )
-
+# 
 # list(
-#   zurich = list(page1 = c(12, 12, 1213),
-#     page2 = c(1222, 12, 1213)),
-#   geneva = list()
+#    zurich = list(page1 = c(12, 12, 1213),
+#      page2 = c(1222, 12, 1213)),
+#    geneva = list()
 # )
-    
-
-# # lausanne
+# 
+# 
+#  # lausanne
 # page1 <- c(12, 13, 14)
 # attr(x = page1, which = "url") <- "http..."
 # 
@@ -69,7 +70,7 @@ Cities of interest.
 Is the path allowed for each city? 
 
 ```{r, eval = FALSE}
-paths_allowed(paste(paths="/en/real-estate/rent/city/", prices, sep=""),
+paths_allowed(paste(paths="/en/real-estate/rent/city/", cities, sep=""),
               domain="https://www.immoscout24.ch")
 get_robotstxt(domain="https://www.immoscout24.ch")
 ```
@@ -168,11 +169,34 @@ item_full_info <- read_html("https://www.immoscout24.ch/en/real-estate/rent/city
   html_nodes(".dAzzeo") %>%
   html_text()
 
+#extract number of rooms
 #regexec(pattern = "rooms*", text = item_full_info)
 str_extract(item_full_info, ".*rooms*") %>% gsub(pattern = " rooms", replacement = "", fixed = TRUE)
 
+#extract Size
 str_extract(item_full_info, ".*m\u00B2") %>% str_extract(., "rooms, .*") %>%
   gsub(pattern=" m\u00B2", replacement = "", fixed = TRUE) %>%
   gsub(pattern="rooms, ", replacement = "", fixed = TRUE)
+
+#extract localisation
+str_extract(item_full_info, ".*,") %>%  
+  gsub(pattern = "1,", replacement = "", fixed = TRUE) %>%
+  str_extract(., ".*,") %>%
+  gsub(pattern = ",", replacement = "", fixed = TRUE) %>%
+  gsub("\\s*\\w*$", replacement = "")
+
+i <- 1
+for (i in length(item_full_info)){
+  print(str_split(item_full_info, pattern=",")[[i]][length(str_split(item_full_info, pattern=",")[[i]])-2])
+}
+#il faudrait faire des règles qui prennent les caractères à droite du chevron 
+str_split(item_full_info, pattern=",")[[i]][length(str_split(item_full_info, pattern=",")[[i]])-2]
+
+#extract price
+str_extract(item_full_info, "eCHF .*") %>% str_extract(., ".*.\u2014 *") %>% 
+  gsub(pattern = "eCHF ", replacement = "", fixed = TRUE) %>%
+  gsub(pattern = ".\u2014", replacement = "", fixed = TRUE) %>%
+  gsub(pattern = ",", replacement = "", fixed = TRUE)
+  #writting "eCHF" deal better with anomalies even though it's a bit barbaric
 ```
 
