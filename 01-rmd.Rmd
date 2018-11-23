@@ -21,7 +21,7 @@ library(stringr)
 
 Example data structure de Iegor a rearranger
 
-```{r eval=FALSE}
+```{r}
 cities <- list(
   zurich = list(),
   geneve = list(),
@@ -132,6 +132,7 @@ Getting the prices with the "Selector Gadget":
 # .kEhyoM .ehLwuE --> the nb of rooms and the surface
 # .gDVamO .fUZwLT --> the address
 # .gDVamO .fUZwLT , .kEhyoM .ehLwuE, .fFoWRd --> all combined without other perturbating lements
+# .csgoYM --> the big box
 ```
 
 Scrapping everything at once:
@@ -153,7 +154,7 @@ for (i in 1:length(cities)){
 
 ## Code to test uf working on the last page of Luganoc(a)
 a <- read_html(url_path_page_immoscout) %>% 
-      html_nodes(".dAzzeo") %>%
+      html_nodes(".csgoYM") %>%
       html_text() %>%
       gsub("\u00B2","",.) %>% 
        gsub(".\u2014","",.) %>% data.frame
@@ -165,8 +166,8 @@ zurich <- unlisted_cities[grep('^zurich', rownames(unlisted_cities)),] %>% data.
 
 Iegor's code
 ```{r}
-item_full_info <- read_html("https://www.immoscout24.ch/en/real-estate/rent/city-lugano?pn=5") %>% 
-  html_nodes(".dAzzeo") %>%
+item_full_info <- read_html("https://www.immoscout24.ch/en/real-estate/rent/city-zurich?pn=5") %>% 
+  html_nodes(".csgoYM") %>%
   html_text()
 
 #extract number of rooms
@@ -182,15 +183,31 @@ str_extract(item_full_info, ".*m\u00B2") %>% str_extract(., "rooms, .*") %>%
 str_extract(item_full_info, ".*,") %>%  
   gsub(pattern = "1,", replacement = "", fixed = TRUE) %>%
   str_extract(., ".*,") %>%
-  gsub(pattern = ",", replacement = "", fixed = TRUE) %>%
-  gsub("\\s*\\w*$", replacement = "")
+  gsub(pattern = ",", replacement = "", fixed = TRUE) 
+# %>%
+#   gsub("\\s*\\w*$", replacement = "")
 
-i <- 1
-for (i in length(item_full_info)){
-  print(str_split(item_full_info, pattern=",")[[i]][length(str_split(item_full_info, pattern=",")[[i]])-2])
-}
+# mylist <- list()
+# for (i in 1:length(item_full_info)){
+#   if(str_extract(item_full_info, "eCHF .*")[i] %>% str_extract(., ".*.\u2014 *") %>% 
+#      gsub(pattern = "eCHF ", replacement = "", fixed = TRUE) %>%
+#      gsub(pattern = ".\u2014", replacement = "", fixed = TRUE) %>%
+#      gsub(pattern = ",", replacement = "", fixed = TRUE ) > 1000
+#      ){
+#     mylist[i] <- returnValue(str_split(item_full_info, pattern=",")[[i]][length(str_split(item_full_info, pattern=",")[[i]])-2]) 
+#   } else {mylist[i] <- returnValue(str_split(item_full_info, pattern=",")[[i]][length(str_split(item_full_info, pattern=",")[[i]])-1])
+#   }
+# }
+
+# ca ca devrait marcher
+str_extract(item_full_info, ".*,") %>% str_extract(., "\u00bb.*") %>% str_extract(., ".*Close") %>%
+  gsub(pattern = "Close", replacement = "", fixed = TRUE) %>%
+  gsub(pattern = ",", replacement = "", fixed = TRUE) %>%
+  gsub(pattern = "\u00bb", replacement = "", fixed = TRUE)
+
+
 #il faudrait faire des règles qui prennent les caractères à droite du chevron 
-str_split(item_full_info, pattern=",")[[i]][length(str_split(item_full_info, pattern=",")[[i]])-2]
+# str_split(item_full_info, pattern=",")[[i]][length(str_split(item_full_info, pattern=",")[[i]])-2]
 
 #extract price
 str_extract(item_full_info, "eCHF .*") %>% str_extract(., ".*.\u2014 *") %>% 
