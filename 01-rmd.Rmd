@@ -187,6 +187,22 @@ str_extract(item_full_info, ".*,") %>%
 # %>%
 #   gsub("\\s*\\w*$", replacement = "")
 
+#extract localisation
+# str_extract(item_full_info, ".*,") %>%
+#   gsub(pattern = ",", replacement = "", fixed = TRUE) %>%
+#   
+#   if(str_extract(item_full_info, "eCHF .*") %>%
+#   str_extract(., ".*.\u2014 *") %>% 
+#   gsub(pattern = "eCHF ", replacement = "", fixed = TRUE) %>%
+#   gsub(pattern = ".\u2014", replacement = "", fixed = TRUE) %>%
+#   gsub(pattern = ",", replacement = "", fixed = TRUE)>1000){
+#     str_extract(., ".*,") %>%
+#     gsub(pattern = ",", replacement = "", fixed = TRUE)
+#   }
+#   
+#   str_extract(., "\u00bb.*")
+#   gsub("\\s*\\w*$", replacement = "")
+
 # mylist <- list()
 # for (i in 1:length(item_full_info)){
 #   if(str_extract(item_full_info, "eCHF .*")[i] %>% str_extract(., ".*.\u2014 *") %>% 
