@@ -220,6 +220,9 @@ zurich <- unlisted_cities[grep('^zurich', rownames(unlisted_cities)),] %>% data.
 
 
 
+```{r}
+write.csv(zurich, file = "zurich.csv")
+```
 
 
 
