@@ -13,6 +13,7 @@ library(robotstxt)
 library(xml2)
 library(rvest)
 library(magrittr)
+library(stringr)
 ```
 
 
@@ -31,19 +32,15 @@ cities <- list(
   lucerne = list(),
   lugano = list()
   )
-
-prices <- cities
-rooms_m2 <- cities
-
-
+# 
 # list(
-#   zurich = list(page1 = c(12, 12, 1213),
-#     page2 = c(1222, 12, 1213)),
-#   geneva = list()
+#    zurich = list(page1 = c(12, 12, 1213),
+#      page2 = c(1222, 12, 1213)),
+#    geneva = list()
 # )
-    
-
-# # lausanne
+# 
+# 
+#  # lausanne
 # page1 <- c(12, 13, 14)
 # attr(x = page1, which = "url") <- "http..."
 # 
@@ -73,7 +70,7 @@ Cities of interest.
 Is the path allowed for each city? 
 
 ```{r, eval = FALSE}
-paths_allowed(paste(paths="/en/real-estate/rent/city/", prices, sep=""),
+paths_allowed(paste(paths="/en/real-estate/rent/city/", cities, sep=""),
               domain="https://www.immoscout24.ch")
 get_robotstxt(domain="https://www.immoscout24.ch")
 ```
@@ -94,21 +91,14 @@ Getting the URL of each cities in new variables linked to each of them:
 for (i in 1:length(cities)){
   attr(cities[[i]], which="url") <- paste("https://www.immoscout24.ch/en/real-estate/rent/city-", names(cities[i]), sep="") 
 }
-for (i in 1:length(prices)){
-  attr(prices[[i]], which="url") <- paste("https://www.immoscout24.ch/en/real-estate/rent/city-", names(prices[i]), sep="") 
-}
-for (i in 1:length(rooms_m2)){
-  attr(rooms_m2[[i]], which="url") <- paste("https://www.immoscout24.ch/en/real-estate/rent/city-", names(rooms_m2[i]), sep="") 
-}
-
 ```
 
 
 
 ```{r}
 pages <- list()
-for( i in 1:length(prices)){
-  pages[[i]] <- read_html(x = paste0(unlist(attributes(prices[[i]]),use.names=FALSE))) %>%
+for( i in 1:length(cities)){
+  pages[[i]] <- read_html(x = paste0(unlist(attributes(cities[[i]]),use.names=FALSE))) %>%
   html_nodes(css = ".cXTlXt") %>%
   html_text() %>%
   as.numeric() %>%
@@ -142,56 +132,10 @@ Getting the prices with the "Selector Gadget":
 # .kEhyoM .ehLwuE --> the nb of rooms and the surface
 # .gDVamO .fUZwLT --> the address
 # .gDVamO .fUZwLT , .kEhyoM .ehLwuE, .fFoWRd --> all combined without other perturbating lements
+# .csgoYM --> the big box
 ```
 
-Getting the prices
-```{r, eval=FALSE}
-for (i in 1:length(prices)){
-  for (page in pages[[i]]){  
-    url_path_page_immoscout <- prices[[i]] %>% 
-      attributes %>% 
-      unlist(use.names=FALSE) %>% 
-      paste0 %>%
-      paste("?pn=", page, sep="") 
-      
-    prices[[i]][[page]] <- list()
-     prices[[i]][[page]] <- read_html(url_path_page_immoscout) %>% 
-      html_nodes(".fFoWRd") %>%
-      html_text() %>% 
-       cbind %>% 
-       as.vector %>% 
-       gsub(".\u2014","",.) %>% # substracting disturbing elements
-       gsub("CHF ","",.) %>% 
-       gsub(",","",.) %>% 
-       as.numeric
-  }
-}
-unlisted_price <- unlist(prices) %>% data.frame
-zurich <- unlisted_price[grep('^zurich', rownames(unlisted_price)),] %>% data.frame
-```
-
-Getting the number of rooms and size of the apartment/house: 
-```{r, eval=FALSE}
-for (i in 1:length(rooms_m2)){
-  for (page in pages[[i]]){  
-    url_path_page_immoscout <- rooms_m2[[i]] %>% 
-      attributes %>% 
-      unlist(use.names = FALSE) %>% 
-      paste0 %>%
-      paste("?pn=", page, sep="") 
-      
-    rooms_m2[[i]][[page]] <- list()
-     rooms_m2[[i]][[page]] <- read_html(url_path_page_immoscout) %>% 
-      html_nodes(".kEhyoM .ehLwuE") %>%
-      html_text() %>% 
-      cbind %>%
-      gsub("\u00B2","",.) %>%
-      strsplit(",")
-  }
-}
-```
-
-everything:
+Scrapping everything at once:
 ```{r}
 for (i in 1:length(cities)){
   for (page in pages[[i]]){  
@@ -203,13 +147,15 @@ for (i in 1:length(cities)){
       
     cities[[i]][[page]] <- list()
      cities[[i]][[page]] <- read_html(url_path_page_immoscout) %>% 
-      html_nodes(".gDVamO .fUZwLT , .kEhyoM .ehLwuE, .fFoWRd") %>%
-      html_text() 
+      html_nodes(".dAzzeo") %>%
+      html_text()
   }
 }
+
+## Code to test uf working on the last page of Luganoc(a)
 a <- read_html(url_path_page_immoscout) %>% 
-      html_nodes(".gDVamO .fUZwLT , .kEhyoM .ehLwuE, .fFoWRd") %>%
-      html_text() %>% 
+      html_nodes(".csgoYM") %>%
+      html_text() %>%
       gsub("\u00B2","",.) %>% 
        gsub(".\u2014","",.) %>% data.frame
 
@@ -218,20 +164,75 @@ unlisted_cities <- unlist(cities) %>% data.frame
 zurich <- unlisted_cities[grep('^zurich', rownames(unlisted_cities)),] %>% data.frame
 ```
 
+Iegor's code
+```{r}
+item_full_info <- read_html("https://www.immoscout24.ch/en/real-estate/rent/city-zurich?pn=5") %>% 
+  html_nodes(".csgoYM") %>%
+  html_text()
 
+#extract number of rooms
+#regexec(pattern = "rooms*", text = item_full_info)
+str_extract(item_full_info, ".*rooms*") %>% gsub(pattern = " rooms", replacement = "", fixed = TRUE)
+
+#extract Size
+str_extract(item_full_info, ".*m\u00B2") %>% str_extract(., "rooms, .*") %>%
+  gsub(pattern=" m\u00B2", replacement = "", fixed = TRUE) %>%
+  gsub(pattern="rooms, ", replacement = "", fixed = TRUE)
+
+#extract localisation
+str_extract(item_full_info, ".*,") %>%  
+  gsub(pattern = "1,", replacement = "", fixed = TRUE) %>%
+  str_extract(., ".*,") %>%
+  gsub(pattern = ",", replacement = "", fixed = TRUE) 
+# %>%
+#   gsub("\\s*\\w*$", replacement = "")
+
+#extract localisation
+# str_extract(item_full_info, ".*,") %>%
+#   gsub(pattern = ",", replacement = "", fixed = TRUE) %>%
+#   
+#   if(str_extract(item_full_info, "eCHF .*") %>%
+#   str_extract(., ".*.\u2014 *") %>% 
+#   gsub(pattern = "eCHF ", replacement = "", fixed = TRUE) %>%
+#   gsub(pattern = ".\u2014", replacement = "", fixed = TRUE) %>%
+#   gsub(pattern = ",", replacement = "", fixed = TRUE)>1000){
+#     str_extract(., ".*,") %>%
+#     gsub(pattern = ",", replacement = "", fixed = TRUE)
+#   }
+#   
+#   str_extract(., "\u00bb.*")
+#   gsub("\\s*\\w*$", replacement = "")
+
+# mylist <- list()
+# for (i in 1:length(item_full_info)){
+#   if(str_extract(item_full_info, "eCHF .*")[i] %>% str_extract(., ".*.\u2014 *") %>% 
+#      gsub(pattern = "eCHF ", replacement = "", fixed = TRUE) %>%
+#      gsub(pattern = ".\u2014", replacement = "", fixed = TRUE) %>%
+#      gsub(pattern = ",", replacement = "", fixed = TRUE ) > 1000
+#      ){
+#     mylist[i] <- returnValue(str_split(item_full_info, pattern=",")[[i]][length(str_split(item_full_info, pattern=",")[[i]])-2]) 
+#   } else {mylist[i] <- returnValue(str_split(item_full_info, pattern=",")[[i]][length(str_split(item_full_info, pattern=",")[[i]])-1])
+#   }
+# }
+
+# ca ca devrait marcher
+str_extract(item_full_info, ".*,") %>% str_extract(., "\u00bb.*") %>% str_extract(., ".*Close") %>%
+  gsub(pattern = "Close", replacement = "", fixed = TRUE) %>%
+  gsub(pattern = ",", replacement = "", fixed = TRUE) %>%
+  gsub(pattern = "\u00bb", replacement = "", fixed = TRUE)
 
 ```{r}
 write.csv(zurich, file = "zurich.csv")
 ```
 
+#il faudrait faire des règles qui prennent les caractères à droite du chevron 
+# str_split(item_full_info, pattern=",")[[i]][length(str_split(item_full_info, pattern=",")[[i]])-2]
 
-
-
-getting the elements of interest (price, title) for each city (only the 1st page)
-```{r}
-# for (i in 1:length(prices)){
-# assign(paste("characs_", prices[i], sep=""), paste("url_immoscout_", prices[i], sep="")  %>% get %>%
-#     html_nodes(".gDVamO .fUZwLT , .kEhyoM .ehLwuE, .fFoWRd") %>%
-#     html_text())
-# }
+#extract price
+str_extract(item_full_info, "eCHF .*") %>% str_extract(., ".*.\u2014 *") %>% 
+  gsub(pattern = "eCHF ", replacement = "", fixed = TRUE) %>%
+  gsub(pattern = ".\u2014", replacement = "", fixed = TRUE) %>%
+  gsub(pattern = ",", replacement = "", fixed = TRUE)
+  #writting "eCHF" deal better with anomalies even though it's a bit barbaric
 ```
+
