@@ -164,12 +164,12 @@ zurich <- unlisted_cities[grep('^zurich', rownames(unlisted_cities)),]
 
 Iegor's code
 ```{r}
-# item_full_info <- read_html("https://www.immoscout24.ch/en/real-estate/rent/city-basel?pn=6") %>%
-#   html_nodes(".csgoYM") %>%
-#   html_text()
+item_full_info <- read_html("https://www.immoscout24.ch/en/real-estate/rent/city-geneve?pn=1") %>%
+  html_nodes(".csgoYM") %>%
+  html_text()
 
-zurich <- unlisted_cities[grep('^geneve', rownames(unlisted_cities)),] 
-item_full_info <- zurich
+geneve <- unlisted_cities[grep('^geneve', rownames(unlisted_cities)),] 
+item_full_info <- geneve
 #extract number of rooms
 a <- data.frame(
   rooms = str_extract(item_full_info, ".*m\u00B2") %>%
@@ -178,11 +178,10 @@ a <- data.frame(
              gsub(pattern = " room", replacement = "", fixed = TRUE),
 
            # Extract Size
-           m2 = str_count(item_full_info, "m\u00B2")
-    str_extract(item_full_info, ".*m\u00B2") %>%
-             str_extract(., "rooms, .*") %>%
-             gsub(pattern=" m\u00B2", replacement = "", fixed = TRUE) %>%
-             gsub(pattern= "rooms, ", replacement = "", fixed = TRUE),
+           m2 = str_extract(item_full_info, ".*m\u00B2\u00AB") %>%
+             str_extract(., ", .*") %>%
+             gsub(pattern=" m\u00B2\u00AB", replacement = "", fixed = TRUE) %>%
+             gsub(pattern= ", ", replacement = "", fixed = TRUE),
            
            #extract price
            price = str_extract(item_full_info, "eCHF .*") %>% str_extract(., ".*.\u2014 *") %>%
@@ -210,23 +209,27 @@ Creating a dataframe for each city
 
 ```{r}
 for (i in 1:length(cities)){
-item_full_info <- unlisted_cities[grep(names(cities[i]), rownames(unlisted_cities)),] 
-#extract number of rooms
-
-assign(paste("df_", names(cities[i]), sep=""),  
-       data.frame(
-         rooms = str_extract(item_full_info, ".*m\u00B2") %>%
-# first taking before m2 for the cases where the word "room" or "rooms" 
-# is mentionned in the description
+  item_full_info <- unlisted_cities[grep(names(cities[i]), rownames(unlisted_cities)),] 
+  #extract number of rooms
+  
+  assign(paste("df_", names(cities[i]), sep=""),  
+         data.frame(
+           rooms = str_extract(item_full_info, ".*m\u00B2") %>%
+             # first taking before m2 for the cases where the word "room" or "rooms" 
+             # is mentionned in the description
              str_extract(., ".*rooms*") %>% 
              gsub(pattern = " rooms", replacement = "", fixed = TRUE) %>%
-             gsub(pattern = " room", replacement = "", fixed = TRUE),
+             gsub(pattern = " room", replacement = "", fixed = TRUE) %>% 
+             as.numeric
+           ,
            
-           # Extract Size ICI ENLEVER m2
-           m2 = str_extract(item_full_info, ".*m\u00B2") %>% 
-             str_extract(., "rooms, .*") %>%
-             gsub(pattern=" m\u00B2", replacement = "", fixed = TRUE) %>%
-             gsub(pattern= "rooms, ", replacement = "", fixed = TRUE),
+           # Extract Size
+           m2 = str_extract(item_full_info, ".*m\u00B2\u00AB") %>%
+             str_extract(., ", .*") %>%
+             gsub(pattern=" m\u00B2\u00AB", replacement = "", fixed = TRUE) %>%
+             gsub(pattern= ", ", replacement = "", fixed = TRUE) 
+           %>% as.integer
+           ,
            
            # Extract localiation
            address =  str_extract(item_full_info, ".*Close") %>%
@@ -246,49 +249,10 @@ assign(paste("df_", names(cities[i]), sep=""),
            price = str_extract(item_full_info, "eCHF .*") %>% str_extract(., ".*.\u2014 *") %>% 
              gsub(pattern = "eCHF ", replacement = "", fixed = TRUE) %>%
              gsub(pattern = ".\u2014", replacement = "", fixed = TRUE) %>%
-             gsub(pattern = ",", replacement = "", fixed = TRUE))
-)
+             gsub(pattern = ",", replacement = "", fixed = TRUE) %>% as.integer
+         )
+  )
 }
 #writting "eCHF" deal better with anomalies even though it's a bit barbaric
 ```
-
-```{r}
-item_full_info <- unlisted_cities[grep(names(cities), rownames(unlisted_cities)),] 
-#extract number of rooms
-
-df_all_cities <- data.frame(rooms = str_extract(item_full_info, ".*m\u00B2") %>%
-# first taking before m2 for the cases where the word "room" or "rooms" 
-# is mentionned in the description
-             str_extract(., ".*rooms*") %>% 
-             gsub(pattern = " rooms", replacement = "", fixed = TRUE) %>%
-             gsub(pattern = " room", replacement = "", fixed = TRUE),
-           
-           # Extract Size
-           m2 = str_extract(item_full_info, ".*m\u00B2") %>% 
-             str_extract(., "rooms, .*") %>%
-             gsub(pattern=" m\u00B2", replacement = "", fixed = TRUE) %>%
-             gsub(pattern= "rooms, ", replacement = "", fixed = TRUE),
-           
-           # Extract localiation
-           address = str_extract(item_full_info, ".*,") %>% 
-             str_extract(., "\u00bb.*") %>% str_extract(., ".*Close") %>%
-             gsub(pattern = "Close", replacement = "", fixed = TRUE) %>%
-             gsub(pattern = ",", replacement = "", fixed = TRUE) %>%
-             gsub(pattern = "\u00bb", replacement = "", fixed = TRUE) %>%
-             gsub(pattern = "\u00FC", replacement = "u", fixed = TRUE) %>%
-             gsub(pattern = "\u00E4", replacement = "a", fixed = TRUE) %>%
-             gsub(pattern = "\u00F6", replacement = "o", fixed = TRUE) %>%
-             gsub(pattern = "\u00E8", replacement = "e", fixed = TRUE)
-           ,
-           
-           #extract price
-           price = str_extract(item_full_info, "eCHF .*") %>% str_extract(., ".*.\u2014 *") %>% 
-             gsub(pattern = "eCHF ", replacement = "", fixed = TRUE) %>%
-             gsub(pattern = ".\u2014", replacement = "", fixed = TRUE) %>%
-             gsub(pattern = ",", replacement = "", fixed = TRUE))
-
-#writting "eCHF" deal better with anomalies even though it's a bit barbaric
-```
-
-
 
