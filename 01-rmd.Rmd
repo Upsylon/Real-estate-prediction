@@ -215,11 +215,10 @@ for (i in 1:length(cities)){
   
   assign(paste("df_", names(cities[i]), sep=""),  
          data.frame(
-           rooms = str_extract(item_full_info, ".*m\u00B2") %>%
+           rooms = str_extract(item_full_info, ".*\u00AB") %>%
              # first taking before m2 for the cases where the word "room" or "rooms" 
              # is mentionned in the description
-             str_extract(., ".*rooms*") %>% 
-             gsub(pattern = " rooms", replacement = "", fixed = TRUE) %>%
+             str_extract(., ".*room") %>% 
              gsub(pattern = " room", replacement = "", fixed = TRUE) %>% 
              as.numeric
            ,
@@ -247,6 +246,10 @@ for (i in 1:length(cities)){
              gsub(pattern = "\u00EA", replacement = "e", fixed = TRUE) %>%
              gsub(pattern = "\u00F4", replacement = "o", fixed = TRUE) %>%
              gsub(pattern = "\u00EF", replacement = "i", fixed = TRUE) %>%
+             gsub(pattern = "\u00EB", replacement = "e", fixed = TRUE) %>%
+             gsub(pattern = "\u00EE", replacement = "e", fixed = TRUE) %>%
+             gsub(pattern = "\u00E7", replacement = "c", fixed = TRUE) %>%
+             gsub(pattern = "\u00E2", replacement = "a", fixed = TRUE) 
            ,
            
            #extract price
