@@ -14,6 +14,7 @@ library(xml2)
 library(rvest)
 library(magrittr)
 library(stringr)
+library(dplyr)
 ```
 
 
@@ -242,7 +243,10 @@ for (i in 1:length(cities)){
              gsub(pattern = "\u00E4", replacement = "a", fixed = TRUE) %>%
              gsub(pattern = "\u00F6", replacement = "o", fixed = TRUE) %>%
              gsub(pattern = "\u00E8", replacement = "e", fixed = TRUE) %>%
-             gsub(pattern = "\u00E9", replacement = "e", fixed = TRUE)
+             gsub(pattern = "\u00E9", replacement = "e", fixed = TRUE) %>%
+             gsub(pattern = "\u00EA", replacement = "e", fixed = TRUE) %>%
+             gsub(pattern = "\u00F4", replacement = "o", fixed = TRUE) %>%
+             gsub(pattern = "\u00EF", replacement = "i", fixed = TRUE) %>%
            ,
            
            #extract price
@@ -250,9 +254,25 @@ for (i in 1:length(cities)){
              gsub(pattern = "eCHF ", replacement = "", fixed = TRUE) %>%
              gsub(pattern = ".\u2014", replacement = "", fixed = TRUE) %>%
              gsub(pattern = ",", replacement = "", fixed = TRUE) %>% as.integer
+           ,
+           
+           # Assign the city
+           city = names(cities[i])
          )
   )
 }
 #writting "eCHF" deal better with anomalies even though it's a bit barbaric
 ```
+Getting one big dataframe
+
+```{r}
+combined_df <- rbind(df_basel, 
+                     df_bern, 
+                     df_geneve, 
+                     df_lausanne, 
+                     df_lucerne, 
+                     df_lugano, 
+                     df_winterthur)
+```
+
 
