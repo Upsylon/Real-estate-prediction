@@ -15,6 +15,8 @@ library(rvest)
 library(magrittr)
 library(stringr)
 library(dplyr)
+library(plotly)
+library(ggmap)
 ```
 
 
@@ -414,10 +416,23 @@ for (i in 1:length(cities)){
 # and weakly rents
 all_cities <- all_cities[all_cities$price > 300,]
 
-a <- all_cities[is.na(all_cities$rooms) & is.na(all_cities$m2),]
+# Deleting rows where we have NA (about 16% of the data)
+all_cities <- all_cities[complete.cases(all_cities),] 
 
-# ca ca marche mais c'est pas hyper propre...
-b <- all_cities[rowSums(is.na(all_cities[ , 1:2])) == 0 | rowSums(is.na(all_cities[ , 1:2])) == 1 , ]
+# a <- all_cities[is.na(all_cities$rooms) & is.na(all_cities$m2),]
+# 
+# # ca ca marche mais c'est pas hyper propre...
+# a <- all_cities[is.na(all_cities$rooms) == FALSE | is.na(all_cities$m2) == FALSE,]
 ```
+
+
+#### Genereting map 
+
+```{r}
+
+# function geocode could be useful
+
+```
+
 
 
