@@ -415,6 +415,9 @@ for (i in 1:length(cities)){
 all_cities <- all_cities[all_cities$price > 300,]
 
 a <- all_cities[is.na(all_cities$rooms) & is.na(all_cities$m2),]
+
+# ca ca marche mais c'est pas hyper propre...
+b <- all_cities[rowSums(is.na(all_cities[ , 1:2])) == 0 | rowSums(is.na(all_cities[ , 1:2])) == 1 , ]
 ```
 
 
