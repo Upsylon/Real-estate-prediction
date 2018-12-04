@@ -17,6 +17,8 @@ library(stringr)
 library(dplyr)
 library(plotly)
 library(ggmap)
+library(googleway)
+library(leaflet)
 ```
 
 
@@ -485,7 +487,7 @@ all_cities <- all_cities[complete.cases(all_cities),]
 ```{r}
 
 # API key obtained with the test period (google)
-#set_key("AIzaSyBQd93y1YsbrWKxMgnaRXoX0Wg6F-fiCqc")
+set_key("AIzaSyBQd93y1YsbrWKxMgnaRXoX0Wg6F-fiCqc")
 
 
 #Create a df with raw information about the address coordinates
