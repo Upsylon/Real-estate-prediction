@@ -299,4 +299,3 @@ addMarkers(lng = loz$longitude, lat = loz$latitude, popup = paste("<b>Price :</b
 # write.csv(all_cities, file = "all_cities.csv")
 ```
 
-
