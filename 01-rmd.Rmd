@@ -37,36 +37,6 @@ cities <- list(
   lucerne = list(),
   lugano = list()
   )
-# 
-# list(
-#    zurich = list(page1 = c(12, 12, 1213),
-#      page2 = c(1222, 12, 1213)),
-#    geneva = list()
-# )
-# 
-# 
-#  # lausanne
-# page1 <- c(12, 13, 14)
-# attr(x = page1, which = "url") <- "http..."
-# 
-# 
-# page2 <- c(11, 13, 14)
-# attr(x = prices$zurich$page2, which = "url") <- "http...2"
-# 
-# prices <- list(
-#   lausanne = list(page1, page2),
-#   basel = list(page1, page2)
-# )
-# 
-# prices
-```
-
-
-Cities of interest.
-
-```{r}
-# cities2 <- c("Zurich", "Geneve", "Basel", "Lausanne", "Bern",
-#             "Winterthur", "Lucerne", "Lugano")
 ```
 
 
@@ -86,11 +56,6 @@ LOOPING OVER EACH CITY
 
 Getting the URL of each cities in new variables linked to each of them:
 
-```{r}
-# for (i in 1:length(cities2)){
-# assign(paste("url_immoscout_", cities2[i], sep=""), paste("https://www.immoscout24.ch/en/real-estate/rent/city-", cities2[i], sep=""))
-#   }
-```
 
 ```{r}
 for (i in 1:length(cities)){
@@ -114,32 +79,6 @@ for( i in 1:length(cities)){
 }
 ```
 
-Looping over cities and pages to get all prices for all cities
-```{r}
-# for (i in 1:length(cities2)){
-#   for (page in paste("pages_immoscout_", cities2[i], sep="") %>% get){
-#     url_path_page_immoscout <-
-#       paste("https://www.immoscout24.ch/en/real-estate/rent/city-",
-#       cities2[i], sep="") %>% 
-#     paste("?pn=", page, sep="")
-# 
-# ## doesnt work...
-# assign(paste("prices_immoscout_", cities2[i], sep="") %>% paste("_page_", page, sep=""), read_html(url_path_page_immoscout) %>% 
-#   html_nodes(".fFoWRd") %>%
-#   html_text())
-#   }
-# }
-```
-
-Getting the prices with the "Selector Gadget":
-
-```{r}
-# .fFoWRd --> the prices
-# .kEhyoM .ehLwuE --> the nb of rooms and the surface
-# .gDVamO .fUZwLT --> the address
-# .gDVamO .fUZwLT , .kEhyoM .ehLwuE, .fFoWRd --> all combined without other perturbating lements
-# .csgoYM --> the big box
-```
 
 Scrapping everything at once:
 ```{r}
@@ -157,15 +96,6 @@ for (i in 1:length(cities)){
       html_text()
   }
 }
-
-## Code to test if working on the last page of Lugano
-# a <- read_html(url_path_page_immoscout) %>% 
-#   html_nodes(".csgoYM") %>%
-#   html_text() %>%
-#   gsub("\u00B2","",.) %>% 
-#   gsub(".\u2014","",.) %>% data.frame
-
-
 ```
 
 Creating one big dataframe with all values of all cities to be used later (not cleaned yet) 
@@ -181,164 +111,8 @@ item_full_info <- read_html(
   "https://www.immoscout24.ch/en/real-estate/rent/city-lausanne?pn=1") %>%
   html_nodes(".csgoYM") %>%
   html_text()
-# 
-# # Code to see the structure of the data once unlisted
-# unlisted_cities <- unlist(cities) %>% data.frame
-# 
-# geneve <- unlisted_cities[grep('^geneve', rownames(unlisted_cities)),] 
-# item_full_info <- geneve
-# 
-# # Code to see if everything works fine
-# my_test <- data.frame(
-#   # Extract number of rooms
-#   rooms = str_extract(item_full_info, ".*m\u00B2") %>%
-#              str_extract(., ".*rooms*") %>%
-#              gsub(pattern = " rooms", replacement = "", fixed = TRUE) %>%
-#              gsub(pattern = " room", replacement = "", fixed = TRUE),
-# 
-#            # Extract Size
-#            m2 = str_extract(item_full_info, ".*m\u00B2\u00AB") %>%
-#              str_extract(., ", .*") %>%
-#              gsub(pattern=" m\u00B2\u00AB", replacement = "", fixed = TRUE) %>%
-#              gsub(pattern= ", ", replacement = "", fixed = TRUE),
-#            
-#            #extract price
-#            price = str_extract(item_full_info, "eCHF .*") %>% str_extract(., ".*.\u2014 *") %>%
-#              gsub(pattern = "eCHF ", replacement = "", fixed = TRUE) %>%
-#              gsub(pattern = ".\u2014", replacement = "", fixed = TRUE) %>%
-#              gsub(pattern = ",", replacement = "", fixed = TRUE),
-# 
-#            # Extract localiation
-#            address =  str_extract(item_full_info, ".*Close") %>%
-#              str_extract(., ".*,") %>%
-#              str_extract(., "\u00bb.*") %>%
-#              gsub(pattern = "Close", replacement = "", fixed = TRUE) %>%
-#              gsub(pattern = ",", replacement = "", fixed = TRUE) %>%
-#              gsub(pattern = "\u00bb", replacement = "", fixed = TRUE) %>%
-#              gsub(pattern = "\u00FC", replacement = "u", fixed = TRUE) %>%
-#              gsub(pattern = "\u00E4", replacement = "a", fixed = TRUE) %>%
-#              gsub(pattern = "\u00F6", replacement = "o", fixed = TRUE) %>%
-#              gsub(pattern = "\u00E8", replacement = "e", fixed = TRUE) %>%
-#              gsub(pattern = "\u00E9", replacement = "e", fixed = TRUE) %>%
-#              gsub(pattern = "\u00EA", replacement = "e", fixed = TRUE) %>%
-#              gsub(pattern = "\u00F4", replacement = "o", fixed = TRUE) %>%
-#              gsub(pattern = "\u00EF", replacement = "i", fixed = TRUE) %>%
-#              gsub(pattern = "\u00EB", replacement = "e", fixed = TRUE) %>%
-#              gsub(pattern = "\u00EE", replacement = "e", fixed = TRUE) %>%
-#              gsub(pattern = "\u00E7", replacement = "c", fixed = TRUE) %>%
-#              gsub(pattern = "\u00E2", replacement = "a", fixed = TRUE) 
-#            ,
-#            
-#            # Assign the city
-#            postcode = str_extract(item_full_info, ".*Close") %>%
-#              str_extract(., ".*,") %>%
-#              str_extract(., "\u00bb.*") %>%
-#              gsub(pattern = "Close", replacement = "", fixed = TRUE) %>%
-#              gsub(pattern = ",", replacement = "", fixed = TRUE) %>% 
-#              gsub(pattern = "\u00bb", replacement = "", fixed = TRUE) %>%
-#              word(., -2),
-#            
-#            city = str_extract(item_full_info, ".*Close") %>%
-#              str_extract(., ".*,") %>%
-#              str_extract(., "\u00bb.*") %>%
-#              gsub(pattern = "Close", replacement = "", fixed = TRUE) %>%
-#              gsub(pattern = ",", replacement = "", fixed = TRUE) %>% 
-#              gsub(pattern = "\u00bb", replacement = "", fixed = TRUE) %>%
-#              word(., -1)
-#          )
 ```
 
-Creating a dataframe for each city
-
-```{r}
-# for (i in 1:length(cities)){
-#   item_full_info <- unlisted_cities[grep(names(cities[i]), rownames(unlisted_cities)),]
-#   #extract number of rooms
-# 
-#   assign(paste("df_", names(cities[i]), sep=""),
-#          data.frame(
-#            rooms = str_extract(item_full_info, ".*\u00AB") %>%
-#              # first taking before m2 for the cases where the word "room" or "rooms"
-#              # is mentionned in the description
-#              str_extract(., ".*room") %>%
-#              gsub(pattern = " room", replacement = "", fixed = TRUE) %>%
-#              as.numeric
-#            ,
-# 
-#            # Extract Size
-#            m2 = str_extract(item_full_info, ".*m\u00B2\u00AB") %>%
-#              gsub(pattern=" m\u00B2\u00AB", replacement = "", fixed = TRUE) %>%
-#              word(.,-1) %>%
-#              as.integer
-#            ,
-# 
-#            #extract price
-#            price = str_extract(item_full_info, "eCHF .*") %>% str_extract(., ".*.\u2014 *") %>%
-#              gsub(pattern = "eCHF ", replacement = "", fixed = TRUE) %>%
-#              gsub(pattern = ".\u2014", replacement = "", fixed = TRUE) %>%
-#              gsub(pattern = ",", replacement = "", fixed = TRUE) %>% as.integer
-#            ,
-# 
-#            # Extract localiation
-#            address =  str_extract(item_full_info, ".*Close") %>%
-#              str_extract(., ".*,") %>%
-#              str_extract(., "\u00bb.*") %>%
-#              gsub(pattern = "Close", replacement = "", fixed = TRUE) %>%
-#              gsub(pattern = ",", replacement = "", fixed = TRUE) %>%
-#              gsub(pattern = "\u00bb", replacement = "", fixed = TRUE) %>%
-#              gsub(pattern = "\u00FC", replacement = "u", fixed = TRUE) %>%
-#              gsub(pattern = "\u00E4", replacement = "a", fixed = TRUE) %>%
-#              gsub(pattern = "\u00F6", replacement = "o", fixed = TRUE) %>%
-#              gsub(pattern = "\u00E8", replacement = "e", fixed = TRUE) %>%
-#              gsub(pattern = "\u00E9", replacement = "e", fixed = TRUE) %>%
-#              gsub(pattern = "\u00EA", replacement = "e", fixed = TRUE) %>%
-#              gsub(pattern = "\u00F4", replacement = "o", fixed = TRUE) %>%
-#              gsub(pattern = "\u00EF", replacement = "i", fixed = TRUE) %>%
-#              gsub(pattern = "\u00EB", replacement = "e", fixed = TRUE) %>%
-#              gsub(pattern = "\u00EE", replacement = "e", fixed = TRUE) %>%
-#              gsub(pattern = "\u00E7", replacement = "c", fixed = TRUE) %>%
-#              gsub(pattern = "\u00E2", replacement = "a", fixed = TRUE)
-#            ,
-# 
-#            # Assign the city
-#            postcode = str_extract(item_full_info, ".*Close") %>%
-#              str_extract(., ".*,") %>%
-#              str_extract(., "\u00bb.*") %>%
-#              gsub(pattern = "Close", replacement = "", fixed = TRUE) %>%
-#              gsub(pattern = ",", replacement = "", fixed = TRUE) %>%
-#              gsub(pattern = "\u00bb", replacement = "", fixed = TRUE) %>%
-#              word(., -2),
-# 
-#            city = str_extract(item_full_info, ".*Close") %>%
-#              str_extract(., ".*,") %>%
-#              str_extract(., "\u00bb.*") %>%
-#              gsub(pattern = "Close", replacement = "", fixed = TRUE) %>%
-#              gsub(pattern = ",", replacement = "", fixed = TRUE) %>%
-#              gsub(pattern = "\u00bb", replacement = "", fixed = TRUE) %>%
-#              gsub(pattern = "\u00FC", replacement = "u", fixed = TRUE) %>%
-#              gsub(pattern = "\u00E8", replacement = "e", fixed = TRUE) %>%
-#              word(., -1)
-#          )
-#   )
-# }
-```
-
-Getting one big dataframe
-
-```{r}
-# combined_df <- rbind(df_basel, 
-#                      df_bern, 
-#                      df_geneve, 
-#                      df_lausanne, 
-#                      df_lucerne, 
-#                      df_lugano, 
-#                      df_winterthur,
-#                      df_zurich)
-```
-
-```{r}
-# write.csv(zurich, file = "zurich.csv")
-```
 
 Creating a dataframe for each city
 
@@ -475,10 +249,7 @@ all_cities <- all_cities[all_cities$price > 300,]
 # Deleting rows where we have NA (about 16% of the data)
 all_cities <- all_cities[complete.cases(all_cities),] 
 
-# a <- all_cities[is.na(all_cities$rooms) & is.na(all_cities$m2),]
-# 
-# # ca ca marche mais c'est pas hyper propre...
-# a <- all_cities[is.na(all_cities$rooms) == FALSE | is.na(all_cities$m2) == FALSE,]
+all_cities <- cbind(all_cities, latitude = NA, longitude = NA)
 ```
 
 
@@ -487,21 +258,42 @@ all_cities <- all_cities[complete.cases(all_cities),]
 ```{r}
 
 # API key obtained with the test period (google)
-set_key("AIzaSyBQd93y1YsbrWKxMgnaRXoX0Wg6F-fiCqc")
+# set_key("AIzaSyBQd93y1YsbrWKxMgnaRXoX0Wg6F-fiCqc")
 
 
-# Create a df with raw information about the address coordinates
-raw_coordinates <- google_geocode(address = "Via Monte Carmen 8 6900 Lugano")
+# # Create a df with raw information about the address coordinates
+# raw_coordinates <- google_geocode(address = "Via Monte Carmen 8 6900 Lugano")
+# 
+# # Create a df with only a column lng and a column ltd
+# coordinates_df <- raw_coordinates$results$geometry$location
+# 
+# # Using leaflet package to map the coordinates
+# leaflet() %>%
+#   addTiles() %>%  # Add default OpenStreetMap map tiles
+#   addMarkers(lng = 8.953442, lat = 46.01331, popup = "The birthplace of R")
 
-#Create a df with only a column lng and a column ltd
-coordinates_df <- raw_coordinates$results$geometry$location
+# GEOCODING FOR ALL THE ADDRESSES
 
-#Using leaflet package to map the coordinates
-leaflet() %>%
-  addTiles() %>%  # Add default OpenStreetMap map tiles
-  addMarkers(lng = 8.953442, lat = 46.01331, popup = "The birthplace of R")
+# for (i in 2911:nrow(all_cities)) {
+#   
+#   location <- google_geocode(
+#     as.vector(all_cities$address[i])
+#   )$results$geometry$location
+#   
+#   if(!is.null(location)) {
+#     all_cities[i, "latitude"] <- location$lat[1]
+#     all_cities[i, "longitude"] <- location$lng[1]
+#     
+#   }
+# }
 
+# write.csv(all_cities, file = "all_cities.csv")
 ```
+
+```{r}
+all_cities <- readRDS(file = "all_cities.rds")
+```
+
 
 
 
