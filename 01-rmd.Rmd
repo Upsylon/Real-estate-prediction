@@ -17,6 +17,7 @@ library(stringr)
 library(dplyr)
 library(plotly)
 library(ggmap)
+library(leaflet)
 ```
 
 
@@ -482,13 +483,14 @@ all_cities <- all_cities[complete.cases(all_cities),]
 #### Genereting map 
 
 ```{r}
+# library(googleway)
 
 # API key obtained with the test period (google)
-#set_key("AIzaSyBQd93y1YsbrWKxMgnaRXoX0Wg6F-fiCqc")
+set_key("AIzaSyBQd93y1YsbrWKxMgnaRXoX0Wg6F-fiCqc")
 
 
 #Create a df with raw information about the address coordinates
-raw_coordinates <- google_geocode(address = "Via Monte Carmen 8 6900 Lugano")
+raw_coordinates <- google_geocode(address = "avenue de l'église anglaise 10 1006 lausanne")
 
 #Create a df with only a column lng and a column ltd
 coordinates_df <- raw_coordinates$results$geometry$location
@@ -496,7 +498,7 @@ coordinates_df <- raw_coordinates$results$geometry$location
 #Using leaflet package to map the coordinates
 leaflet() %>%
   addTiles() %>%  # Add default OpenStreetMap map tiles
-  addMarkers(lng=8.953442, lat=46.01331, popup="The birthplace of R")
+  addMarkers(lng=6.631378, lat=46.51382, popup="The birthplace of R")
 
 ```
 
