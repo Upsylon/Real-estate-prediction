@@ -491,15 +491,16 @@ set_key("AIzaSyBQd93y1YsbrWKxMgnaRXoX0Wg6F-fiCqc")
 
 
 #Create a df with raw information about the address coordinates
-raw_coordinates <- google_geocode(address = "Via Monte Carmen 8 6900 Lugano")
+raw_coordinates <- google_geocode(address = "rue du simplon 3b 1006 Lausanne")
 
 #Create a df with only a column lng and a column ltd
 coordinates_df <- raw_coordinates$results$geometry$location
 
 #Using leaflet package to map the coordinates
-leaflet() %>%
+leaflet(options = leafletOptions(minZoom = 7.4)) %>%
+  setMaxBounds(6, 47.9, 10.5, 45.8) %>%
   addTiles() %>%  # Add default OpenStreetMap map tiles
-  addMarkers(lng=8.953442, lat=46.01331, popup="The birthplace of R")
+  addMarkers(lng=df3$lng, lat=df3$lat, popup="The birthplace of R")
 
 ```
 
