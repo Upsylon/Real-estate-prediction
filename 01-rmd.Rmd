@@ -254,7 +254,7 @@ all_cities <- cbind(all_cities, latitude = NA, longitude = NA)
 
 ```{r}
 all_cities <- readRDS(file = "all_cities.rds")
-loz <- all_cities %>% filter(city == "Lausanne")
+all_cities <- all_cities %>% filter(city == "Lausanne")
 ```
 
 
@@ -272,11 +272,11 @@ loz <- all_cities %>% filter(city == "Lausanne")
 
 # Using leaflet package to map the coordinates
 leaflet(options = leafletOptions(minZoom = 7.4)) %>%
-setMaxBounds(6, 47.9, 10.5, 45.8) %>%
+setMaxBounds(5.5, 48.2, 11, 45.3) %>%
 addTiles() %>%  # Add default OpenStreetMap map tiles
-addMarkers(lng = loz$longitude, lat = loz$latitude, popup = paste("<b>Price :</b>", loz$price,"   CHF","<br/>", "<b>Adresse :</b>", loz$address,"<br/>",
-                                                                  "<b>Number of rooms :</b>", loz$rooms,"<br/>",
-                                                                  "<b>Size :</b>", loz$m2, " m2"))
+addMarkers(lng = all_cities$longitude, lat = all_cities$latitude, popup = paste("<b>Price :</b>", all_cities$price,"   CHF","<br/>", "<b>Adress :</b>", all_cities$address,"<br/>",
+                                                                  "<b>Number of rooms :</b>", all_cities$rooms,"<br/>",
+                                                                  "<b>Size :</b>", all_cities$m2, " m2"))
 ```
 
 ```{r}
