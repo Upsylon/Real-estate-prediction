@@ -1,6 +1,6 @@
-ui <- library(shiny)
+library(shiny)
 
-shinyUI(fluidPage(
+ui <- shinyUI(fluidPage(
   
   titlePanel("Pi Estimation"),
   
@@ -41,9 +41,6 @@ shinyUI(fluidPage(
   )
 )
 )
-
-
-library(shiny)
 
 server <- shinyServer(function(input, output) {
   
@@ -87,3 +84,5 @@ server <- shinyServer(function(input, output) {
   })
 }
 )
+
+shinyApp(ui = ui, server = server)
