@@ -274,7 +274,7 @@ loz <- all_cities %>% filter(city == "Lausanne")
 leaflet(options = leafletOptions(minZoom = 7.4)) %>%
 setMaxBounds(6, 47.9, 10.5, 45.8) %>%
 addTiles() %>%  # Add default OpenStreetMap map tiles
-addMarkers(lng = loz$longitude, lat = loz$latitude, popup = "The birthplace of R")
+addMarkers(lng = loz$longitude, lat = loz$latitude, popup = paste("Price:", loz$price))
 ```
 
 ```{r}
