@@ -260,7 +260,6 @@ all_cities <- cbind(all_cities, latitude = NA, longitude = NA)
 # API key obtained with the test period (google)
 # set_key("AIzaSyBQd93y1YsbrWKxMgnaRXoX0Wg6F-fiCqc")
 
-
 # # Create a df with raw information about the address coordinates
 # raw_coordinates <- google_geocode(address = "Via Monte Carmen 8 6900 Lugano")
 # 
@@ -289,6 +288,7 @@ all_cities <- cbind(all_cities, latitude = NA, longitude = NA)
 
 # write.csv(all_cities, file = "all_cities.csv")
 ```
+
 
 ```{r}
 all_cities <- readRDS(file = "all_cities.rds")
