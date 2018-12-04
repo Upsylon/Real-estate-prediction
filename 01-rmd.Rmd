@@ -8,7 +8,7 @@ output:
     highlight: tango
 ---
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 library(robotstxt)
 library(xml2)
 library(rvest)
