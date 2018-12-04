@@ -297,4 +297,3 @@ addMarkers(lng = loz$longitude, lat = loz$latitude, popup = paste("Price:", loz$
 # write.csv(all_cities, file = "all_cities.csv")
 ```
 
-
