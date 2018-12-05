@@ -459,7 +459,7 @@ all_cities <- all_cities %>% filter(city == "Lausanne")
 # coordinates_df <- raw_coordinates$results$geometry$location
 
 # Using leaflet package to map the coordinates
-leaflet(options = leafletOptions(minZoom = 7.4)) %>%
+leaflet(all_cities, options = leafletOptions(minZoom = 7.4)) %>%
   setMaxBounds(5.5, 48.2, 11, 45.3) %>%
   addTiles() %>%  # Add default OpenStreetMap map tiles
   addMarkers(
@@ -480,7 +480,16 @@ leaflet(options = leafletOptions(minZoom = 7.4)) %>%
   all_cities$m2,
   " m2"
   )
+  ) %>%
+  addPopups(
+    6.6322734, 46.5196535, popup = "Lausanne",
+    options = popupOptions(closeButton = T)
+  ) %>%
+  addPopups(
+    8.539183, 47.368650, popup = "Zurich",
+    options = popupOptions(closeButton = T)
   )
+  #etc. 
 ```
 
 ```{r}
