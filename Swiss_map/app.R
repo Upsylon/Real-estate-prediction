@@ -13,25 +13,18 @@ ui <- shinyUI(fluidPage(
                 sliderInput("rangeM2", "Surface in m\u00B2", min(all_cities$m2), max(all_cities$m2),
                             value = range(all_cities$m2), step = 1
                 ),
-                selectInput("City", "City",
-                            unique(all_cities$city))
-                ),
                 hr(
                 ),
-                conditionalPanel(
-                  condition = "input.city == all_cities$city",
-                  selectInput("PostCode", "PostCode",
-                              "input.city" %>% unique(all_cities$postcode))
-                  )
-                )        
-                )#,
+                selectInput("City", "City",
+                            unique(all_cities$city))
+                )
                 #checkboxInput("legend", "Show legend", TRUE) Might be handy later if we get legends.
-  )#,
   # p(), #drity way of making space between map and button
   # actionButton("button", label = "Apply Changes", icon = NULL, width = NULL)
 )
+)
 
-server <- function(input, output, session) {
+server <- function(input, output) {
   
   points <- eventReactive(input$button, {
     
