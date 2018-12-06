@@ -3,7 +3,7 @@ library(leaflet)
 
 ui <- shinyUI(fluidPage(
   leafletOutput("map"),
-  absolutePanel(top = 10, right = 10,
+  absolutePanel(top = 5, right = 25,
                 sliderInput("rangePrice", "Price", min(all_cities$price), max(all_cities$price),
                             value = range(all_cities$price), step = 10
                 ),
@@ -12,8 +12,6 @@ ui <- shinyUI(fluidPage(
                 ),
                 sliderInput("rangeM2", "Surface in m\u00B2", min(all_cities$m2), max(all_cities$m2),
                             value = range(all_cities$m2), step = 1
-                ),
-                hr(
                 ),
                 selectInput("City", "City",
                             unique(all_cities$city))
@@ -26,36 +24,46 @@ ui <- shinyUI(fluidPage(
 
 server <- function(input, output) {
   
-  points <- eventReactive(input$button, {
-    
-  }, ignoreNULL = FALSE)
+  filteredData <- reactive({
+    all_cities[all_cities$price >= input$rangePrice[1] & all_cities$price <= input$rangePrice[2],]
+  })
   
   output$map <- renderLeaflet({
-    leaflet(all_cities, options = leafletOptions(minZoom = 7.4)) %>%
+      leaflet(all_cities, options = leafletOptions(minZoom = 7.4)) %>%
       setMaxBounds(5.5, 48.2, 11, 45.3) %>%
-      addTiles() %>%  # Add default OpenStreetMap map tiles
+      addTiles()  # Add default OpenStreetMap map tiles
+        # %>% 
+        # for (i in i:(length(unique(all_cities$city)))){
+        #   addPopups(
+        #     lng = summarize(group_by(all_cities, city)[i,], mean(longitude))[,2],
+        #     lat = summarize(group_by(all_cities, city)[i,], mean(latitude))[,2],
+        #     popup = unique(all_cities$city)[i],
+        #     options = popupOptions(closeButton = T)
+        #   )
+        # }
+  })
+  
+  observe({
+    proxy <- leafletProxy("map", data = filteredData()) %>%
+      clearShapes() %>%
       addMarkers(
-        lng = all_cities$longitude,
-        lat = all_cities$latitude,
+        lng = filteredData$longitude,
+        lat = filteredData$latitude,
         popup = paste(
           "<b>Price :</b>",
-          all_cities$price,
+          filteredData$price,
           "   CHF",
           "<br/>",
           "<b>Adress :</b>",
-          all_cities$address,
+          filteredData$address,
           "<br/>",
           "<b>Number of rooms :</b>",
-          all_cities$rooms,
+          filteredData$rooms,
           "<br/>",
           "<b>Size :</b>",
-          all_cities$m2,
+          filteredData$m2,
           " m2"
         )
-      ) %>%
-      addPopups(
-        6.6322734, 46.5196535, popup = "Lausanne",
-        options = popupOptions(closeButton = T)
       )
   })
 }
