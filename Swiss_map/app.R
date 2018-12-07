@@ -13,7 +13,7 @@ ui <- shinyUI(fluidPage(
                 sliderInput("rangeM2", "Surface in m\u00B2", min(all_cities$m2), max(all_cities$m2),
                             value = range(all_cities$m2), step = 1
                 ),
-                selectInput("City", "City",
+                checkboxGroupInput("City", "City",
                             unique(all_cities$city))
                 )
                 #checkboxInput("legend", "Show legend", TRUE) Might be handy later if we get legends.
@@ -32,8 +32,8 @@ server <- function(input, output) {
       leaflet(all_cities, options = leafletOptions(minZoom = 7.4)) %>%
       setMaxBounds(5.5, 48.2, 11, 45.3) %>%
       addTiles()  # Add default OpenStreetMap map tiles
-        # %>% 
-        # for (i in i:(length(unique(all_cities$city)))){
+        # %>%
+        # for (i in 1:(length(unique(all_cities$city)))){
         #   addPopups(
         #     lng = summarize(group_by(all_cities, city)[i,], mean(longitude))[,2],
         #     lat = summarize(group_by(all_cities, city)[i,], mean(latitude))[,2],
@@ -47,21 +47,21 @@ server <- function(input, output) {
     proxy <- leafletProxy("map", data = filteredData()) %>%
       clearShapes() %>%
       addMarkers(
-        lng = filteredData$longitude,
-        lat = filteredData$latitude,
+        lng = all_cities$longitude,
+        lat = all_cities$latitude,
         popup = paste(
           "<b>Price :</b>",
-          filteredData$price,
+          all_cities$price,
           "   CHF",
           "<br/>",
           "<b>Adress :</b>",
-          filteredData$address,
+          all_cities$address,
           "<br/>",
           "<b>Number of rooms :</b>",
-          filteredData$rooms,
+          all_cities$rooms,
           "<br/>",
           "<b>Size :</b>",
-          filteredData$m2,
+          all_cities$m2,
           " m2"
         )
       )
