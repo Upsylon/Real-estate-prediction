@@ -19,6 +19,32 @@ library(plotly)
 library(ggmap)
 library(googleway)
 library(leaflet)
+library(caret)
+library(swissimmo)
+```
+
+```{r, echo = FALSE}
+my_theme <- function(base_size = 10, base_family = "sans") {
+  theme_minimal(base_size = base_size, base_family = base_family) +
+    theme(
+      axis.text = element_text(size = 10),
+      axis.text.x = element_text(vjust = 0.5, hjust = 0.5),
+      axis.title = element_text(size = 12),
+      plot.title = element_text(hjust = 0.5),
+      panel.grid.major = element_line(color = "grey"),
+      panel.grid.minor = element_blank(),
+      panel.background = element_rect(fill = "aliceblue"),
+      strip.background = element_rect(fill = "lightgrey", 
+                                      color = "grey", size = 1),
+      strip.text = element_text(face = "bold", size = 10, color = "black"),
+      legend.position = "bottom",
+      legend.justification = "top", 
+      legend.box = "horizontal",
+      legend.box.background = element_rect(colour = "grey50"),
+      legend.background = element_blank(),
+      panel.border = element_rect(color = "grey", fill = NA, size = 0.5)
+    )
+}
 ```
 
 ```{r}
@@ -433,6 +459,7 @@ for (i in 1:length(cities)) {
 # selecting only prices > 500 to get rid off most of wrong recorder data
 # and weakly rents
 all_cities <- all_cities[all_cities$price > 300,]
+all_cities <- all_cities[all_cities$price < 10000,]
 
 # Deleting rows where we have NA (about 16% of the data)
 all_cities <- all_cities[complete.cases(all_cities),] 
@@ -511,4 +538,136 @@ leaflet(all_cities, options = leafletOptions(minZoom = 7.4)) %>%
 
 # write.csv(all_cities, file = "all_cities.csv")
 ```
+
+
+
+
+```{r}
+# After having tested multiple models with the caret package, we observe that
+# the random forest with ntree = 500 and mtry = 3 leads to the best results 
+# in term of minimizing the RMSE. We decide to use this model to forecast
+# the price of the different housings. 
+# The explanatory variables used are the rooms, m2 and the city. We didn't use
+# the postcode as too many factors would have been used.
+
+# train_control <- trainControl(method = "cv", number = 10)
+
+# rf_cv <- train(form = price ~ rooms + m2 + city,
+#                  data = all_cities,
+#                  trControl = train_control,
+#                  tuneGrid = data.frame(
+#                    mtry = c(2:7)), # can take a while
+#                  method = "rf")
+# rf_cv$results
+# 
+# svm_cv <- train(form = price ~ rooms + m2 + city,
+#                  data = all_cities,
+#                  trControl = train_control,
+#                  tuneGrid = data.frame(
+#                    C = c(0.1, 1, 10, 100)),
+#                  method = "svmRadialCost")
+# svm_cv$results
+# 
+# 
+# mars_cv <- train(form = price ~ rooms + m2 + city,
+#                  data = all_cities,
+#                  trControl = train_control,
+#   method = "bagEarthGCV")
+# mars_cv$results
+# 
+# gam_cv <- train(form = price ~ rooms + m2 + city,
+#                  data = all_cities,
+#                  trControl = train_control,
+#   method = "gam")
+# gam_cv$results
+
+set.seed(1)
+index.train <- createDataPartition(y = all_cities$price, p = 0.7, list = FALSE)
+train_set <- all_cities[index.train,]
+test_set <- all_cities[-index.train,]
+
+rf_price <- randomForest::randomForest(price ~ rooms + m2 + city, 
+                                            data = train_set,
+                                            ntree = 500, 
+                                            mtry = 3)
+
+# The predicted values on the testing set
+predictions <- predict(rf_price, newdata = test_set)
+
+# RMSE
+(predict(rf_price, newdata = test_set) - test_set$price) ^ 2 %>% mean %>% sqrt
+
+# The plot of the predictions against the real values
+ggplot() + 
+  geom_point(aes(x = predict(rf_price, newdata = test_set), y = test_set$price)) +
+  my_theme() +
+  geom_abline(slope = 1, intercept = 1, color = "red") +
+  xlab("Predicted values of the testing set") +
+  ylab("Real value of the testing set") 
+
+# Now, we now that the random forest is the model to choose and we can build a 
+# new one on the whole dataset. Of course, we have overfitting as we predict
+# instances that we already know.
+
+
+
+predict_price <- function(housings, rooms, m2, city, model = "rf", seed = 1) {
+
+  set.seed(seed)
+  
+  if (missing(housings) && (missing(rooms) || missing(m2) || missing(city))){
+    message("Please enter an appropriate dataframe or complete informations")
+  } else if (missing(housings) && !missing(rooms) && !missing(m2) && !missing(city)) {
+    message("The output is the estimated price for an unique housing")
+  } else if (
+    !missing(housings) && (!missing(rooms) || !missing(m2) || !missing(city))
+    ) { 
+    message("The output will be calculated based only on the dataframe")
+  }
+  
+  if (!missing(housings)) {
+  
+    model_used <- train(form = price ~ rooms + m2 + city,
+                        data = housings,
+                        method = model)
+  
+  predictions <- predict(model_used)
+  
+  housings <- housings %>% mutate(predicted_price = predictions)
+  
+  return(housings)
+  }
+  
+  if (missing(housings) && !missing(rooms) && !missing(m2) && !missing(city)) {
+    housings <- get_immodata(city)
+    
+    model_used <- train(form = price ~ rooms + m2,
+                        data = housings,
+                        method = model)
+    prediction <- predict(model_used, newdata = city)
+    
+    return(prediction)
+  }
+}
+predict_price(city = "crissier", rooms = 2, m2 = 22)
+
+cities <- get_immodata(c("crissier", "muttenz"))
+predict_price(cities)
+# gam
+# lm
+# rf
+# nnet
+# svmRadialCost
+# rpart
+# etc.
+
+ggplot() + 
+  geom_point(aes(x = predict(rf_price), y = housings$price)) +
+  my_theme() +
+  geom_abline(slope = 1, intercept = 1, color = "red") +
+  xlab("Predicted values of the testing set") +
+  ylab("Real value of the testing set") 
+
+```
+
 
