@@ -32,7 +32,7 @@ server <- function(input, output) {
       leaflet(all_cities, options = leafletOptions(minZoom = 7.4)) %>%
       setMaxBounds(5.5, 48.2, 11, 45.3) %>%
       addTiles()  # Add default OpenStreetMap map tiles
-        # %>% 
+        # %>%
         # for (i in i:(length(unique(all_cities$city)))){
         #   addPopups(
         #     lng = summarize(group_by(all_cities, city)[i,], mean(longitude))[,2],
