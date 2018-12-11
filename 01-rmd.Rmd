@@ -473,43 +473,51 @@ all_cities <- all_cities %>% filter(city == "Lausanne")
 ```
 
 
+#### Get prices predictions
+```{r}
+predictions <- predict_price(all_cities)
+
+all_cities <- summary(predictions)
+
+all_cities$predicted_price <- round(all_cities$predicted_price, digits = 0)
+
+# Convert predicted_prices into list
+all_cities$predicted_price <- as.numeric(unlist(all_cities$predicted_price))
+```
+
 #### Genereting map 
 
 ```{r}
-<<<<<<< HEAD
 # library(googleway)
-
-=======
->>>>>>> 23fd0975363da86d3e2d9dd68a7333db195e4ff1
 # API key obtained with the test period (google)
 # set_key("AIzaSyBQd93y1YsbrWKxMgnaRXoX0Wg6F-fiCqc")
 
 # Create a df with raw information about the address coordinates
 # raw_coordinates <- google_geocode(address = "Via Monte Carmen 8 6900 Lugano")
 
-<<<<<<< HEAD
-#Create a df with raw information about the address coordinates
-raw_coordinates <- google_geocode(address = "avenue de l'église anglaise 10 1006 lausanne")
-=======
+
+# Create a df with raw information about the address coordinates
+# raw_coordinates <- google_geocode(address = "avenue de l'église anglaise 10 1006 lausanne")
+
 # Create a df with only a column lng and a column ltd
 # coordinates_df <- raw_coordinates$results$geometry$location
->>>>>>> 23fd0975363da86d3e2d9dd68a7333db195e4ff1
 
 # Using leaflet package to map the coordinates
 leaflet(all_cities, options = leafletOptions(minZoom = 7.4)) %>%
   setMaxBounds(5.5, 48.2, 11, 45.3) %>%
-  addTiles() %>%  # Add default OpenStreetMap map tiles
-<<<<<<< HEAD
-  addMarkers(lng=6.631378, lat=46.51382, popup="The birthplace of R")
-
-=======
-  addMarkers(
+  addTiles() %>%
+  addCircles(
   lng = all_cities$longitude,
   lat = all_cities$latitude,
+  color = ifelse(all_cities$price < all_cities$predicted_price, "green", "red"),
   popup = paste(
   "<b>Price :</b>",
   all_cities$price,
   "   CHF",
+  "<br/>",
+  "<b>Predicted price :</b>",
+  all_cities$predicted_price,
+  " CHF",
   "<br/>",
   "<b>Adress :</b>",
   all_cities$address,
@@ -520,6 +528,7 @@ leaflet(all_cities, options = leafletOptions(minZoom = 7.4)) %>%
   "<b>Size :</b>",
   all_cities$m2,
   " m2"
+  
   )
 )
 ```
@@ -540,7 +549,6 @@ leaflet(all_cities, options = leafletOptions(minZoom = 7.4)) %>%
 #     
 #   }
 # }
->>>>>>> 23fd0975363da86d3e2d9dd68a7333db195e4ff1
 
 # write.csv(all_cities, file = "all_cities.csv")
 ```

@@ -43,12 +43,18 @@ server <- function(input, output) {
     leafletProxy("map", data = filteredData()) %>%
       clearShapes() %>%
       addCircles(
+        radius = 20,
         lng = filteredData()$longitude,
         lat = filteredData()$latitude,
+        color = ifelse(all_cities$price < all_cities$predicted_price, "green", "red"),
         popup = paste(
           "<b>Price :</b>",
           filteredData()$price,
           "   CHF",
+          "<br/>",
+          "<b>Predicted price :</b>",
+          filteredData()$predicted_price,
+          " CHF",
           "<br/>",
           "<b>Adress :</b>",
           filteredData()$address,
