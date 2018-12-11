@@ -5,7 +5,7 @@ ui <- shinyUI(fluidPage(
   leafletOutput("map"),
   wellPanel(
   textInput(inputId = "City", label = "City",
-              value = "Input city names without accent or special character")
+              value = "Bussigny")
   ,
   sliderInput("rangePrice", "Price", 0,
                         10000,
@@ -41,20 +41,20 @@ ui <- shinyUI(fluidPage(
 
 server <- function(input, output) {
   
-  # all_cities <- get_immodata2
-  
-  # filteredData <- reactive({
-  #   all_cities[all_cities$price >= input$rangePrice[1] & all_cities$price <= input$rangePrice[2] &
-  #                all_cities$rooms >= input$rangeRooms[1] & all_cities$rooms <= input$rangeRooms[2] &
-  #                all_cities$m2 >= input$rangeM2[1] & all_cities$m2 <= input$rangeM2[2]]
-  # })
+  isolate(all_cities <- get_immodata2(input$City))
   
   filteredData <- reactive({
     all_cities[all_cities$price >= input$rangePrice[1] & all_cities$price <= input$rangePrice[2] &
-               all_cities$rooms >= input$rangeRooms[1] & all_cities$rooms <= input$rangeRooms[2] &
-               all_cities$m2 >= input$rangeM2[1] & all_cities$m2 <= input$rangeM2[2] &
-               all_cities$city == input$City,]
+                 all_cities$rooms >= input$rangeRooms[1] & all_cities$rooms <= input$rangeRooms[2] &
+                 all_cities$m2 >= input$rangeM2[1] & all_cities$m2 <= input$rangeM2[2]]
   })
+  
+  # filteredData <- reactive({
+  #   all_cities[all_cities$price >= input$rangePrice[1] & all_cities$price <= input$rangePrice[2] &
+  #              all_cities$rooms >= input$rangeRooms[1] & all_cities$rooms <= input$rangeRooms[2] &
+  #              all_cities$m2 >= input$rangeM2[1] & all_cities$m2 <= input$rangeM2[2] &
+  #              all_cities$city == input$City,]
+  # })
   
   output$map <- renderLeaflet({
       leaflet(all_cities, options = leafletOptions(minZoom = 7.4)) %>%
