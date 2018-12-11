@@ -21,7 +21,6 @@ ui <- shinyUI(fluidPage(
   # actionButton("button", label = "Apply Changes", icon = NULL, width = NULL)
 )
 )
-
 server <- function(input, output) {
   
   filteredData <- reactive({
@@ -31,7 +30,7 @@ server <- function(input, output) {
   output$map <- renderLeaflet({
       leaflet(all_cities, options = leafletOptions(minZoom = 7.4)) %>%
       setMaxBounds(5.5, 48.2, 11, 45.3) %>%
-      addTiles()  # Add default OpenStreetMap map tiles
+      addTiles() # Add default OpenStreetMap map tiles
         # %>%
         # for (i in i:(length(unique(all_cities$city)))){
         #   addPopups(
@@ -44,27 +43,27 @@ server <- function(input, output) {
   })
   
   observe({
-    proxy <- leafletProxy("map", data = filteredData()) %>%
+    leafletProxy("map", data = filteredData()) %>%
       clearShapes() %>%
       addMarkers(
-        lng = filteredData$longitude,
-        lat = filteredData$latitude,
-        popup = paste(
-          "<b>Price :</b>",
-          filteredData$price,
-          "   CHF",
-          "<br/>",
-          "<b>Adress :</b>",
-          filteredData$address,
-          "<br/>",
-          "<b>Number of rooms :</b>",
-          filteredData$rooms,
-          "<br/>",
-          "<b>Size :</b>",
-          filteredData$m2,
-          " m2"
-        )
-      )
+        lng = filteredData()$longitude,
+        lat = filteredData()$latitude)
+      #   popup = paste(
+      #     "<b>Price :</b>",
+      #     filteredData$price,
+      #     "   CHF",
+      #     "<br/>",
+      #     "<b>Adress :</b>",
+      #     filteredData$address,
+      #     "<br/>",
+      #     "<b>Number of rooms :</b>",
+      #     filteredData$rooms,
+      #     "<br/>",
+      #     "<b>Size :</b>",
+      #     filteredData$m2,
+      #     " m2"
+      #   )
+      # )
   })
 }
 
