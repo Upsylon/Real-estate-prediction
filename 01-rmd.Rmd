@@ -8,7 +8,7 @@ output:
     highlight: tango
 ---
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 library(robotstxt)
 library(xml2)
 library(rvest)
@@ -17,6 +17,7 @@ library(stringr)
 library(dplyr)
 library(plotly)
 library(ggmap)
+library(googleway)
 library(leaflet)
 ```
 
@@ -336,7 +337,7 @@ Getting one big dataframe
 ```
 
 ```{r}
-write.csv(zurich, file = "zurich.csv")
+# write.csv(zurich, file = "zurich.csv")
 ```
 
 Creating a dataframe for each city
@@ -345,7 +346,7 @@ Getting only the big dataframe (named all_cities) directly without creating "sub
 
 ```{r}
 all_cities <- data.frame()
-for (i in 1:length(cities)){
+for (i in 1:length(cities)) {
   item_full_info <- unlisted_cities[grep(names(cities[i]), 
                                          rownames(unlisted_cities)),] 
   #extract number of rooms
@@ -396,6 +397,7 @@ for (i in 1:length(cities)){
            
            # Assign the city
            city = names(cities[i])
+         )
          )
 
   city <-  data.frame(
@@ -499,6 +501,7 @@ coordinates_df <- raw_coordinates$results$geometry$location
 leaflet() %>%
   addTiles() %>%  # Add default OpenStreetMap map tiles
   addMarkers(lng=6.631378, lat=46.51382, popup="The birthplace of R")
+
 
 ```
 
