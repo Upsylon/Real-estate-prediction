@@ -469,6 +469,7 @@ all_cities <- cbind(all_cities, latitude = NA, longitude = NA)
 
 ```{r}
 all_cities <- readRDS(file = "all_cities.rds")
+all_cities <- all_cities[all_cities$price < 10000,]
 all_cities <- all_cities %>% filter(city == "Lausanne")
 ```
 
@@ -587,9 +588,9 @@ train_set <- all_cities[index.train,]
 test_set <- all_cities[-index.train,]
 
 rf_price <- randomForest::randomForest(price ~ rooms + m2 + city, 
-                                            data = train_set,
-                                            ntree = 500, 
-                                            mtry = 3)
+                                       data = train_set,
+                                       ntree = 500, 
+                                       mtry = 3)
 
 # The predicted values on the testing set
 predictions <- predict(rf_price, newdata = test_set)
@@ -612,7 +613,7 @@ ggplot() +
 
 
 predict_price <- function(housings, rooms, m2, city, model = "rf", seed = 1) {
-
+  
   set.seed(seed)
   
   if (missing(housings) && (missing(rooms) || missing(m2) || missing(city))){
@@ -621,21 +622,30 @@ predict_price <- function(housings, rooms, m2, city, model = "rf", seed = 1) {
     message("The output is the estimated price for an unique housing")
   } else if (
     !missing(housings) && (!missing(rooms) || !missing(m2) || !missing(city))
-    ) { 
+  ) { 
     message("The output will be calculated based only on the dataframe")
   }
   
   if (!missing(housings)) {
-  
+    
     model_used <- train(form = price ~ rooms + m2 + city,
                         data = housings,
                         method = model)
-  
-  predictions <- predict(model_used)
-  
-  housings <- housings %>% mutate(predicted_price = predictions)
-  
-  return(housings)
+    
+    predictions <- predict(model_used)
+    
+    df_predict <- housings %>% mutate(predicted_price = predictions)
+    
+    rval <- list(
+      df_predict = df_predict,
+      points = data.frame(
+        predictions = predictions, 
+        real_price = housings$price %>% as.double)
+    )
+    
+    class(rval) <- "pred"
+    
+    return(rval)
   }
   
   if (missing(housings) && !missing(rooms) && !missing(m2) && !missing(city)) {
@@ -644,15 +654,20 @@ predict_price <- function(housings, rooms, m2, city, model = "rf", seed = 1) {
     model_used <- train(form = price ~ rooms + m2,
                         data = housings,
                         method = model)
-    prediction <- predict(model_used, newdata = city)
-    
-    return(prediction)
+    predictions <- predict(model_used, newdata = city)
+    return(paste("The predicted price for this housing is", 
+                 round(predictions, 0), 
+                 "CHF."
+    )
+    )
   }
 }
-predict_price(city = "crissier", rooms = 2, m2 = 22)
+
+
+predict_price(city = "crissier", rooms = 3, m2 = 45)
 
 cities <- get_immodata(c("crissier", "muttenz"))
-predict_price(cities)
+prediction <- predict_price(cities)
 # gam
 # lm
 # rf
@@ -661,12 +676,27 @@ predict_price(cities)
 # rpart
 # etc.
 
-ggplot() + 
-  geom_point(aes(x = predict(rf_price), y = housings$price)) +
-  my_theme() +
-  geom_abline(slope = 1, intercept = 1, color = "red") +
-  xlab("Predicted values of the testing set") +
-  ylab("Real value of the testing set") 
+summary.pred <- function(pred_object) {
+  
+  x = pred_object[["df_predict"]]
+  
+  return(x)
+}
+summary(prediction)
+
+plot.pred <- function(pred_object) {
+
+  x = pred_object[["points"]]["predictions"]
+  y = pred_object[["points"]]["real_price"] 
+  
+  print(ggplot() + 
+          geom_point(aes(x = x$predictions, y = y$real_price)) +
+          my_theme() +
+          geom_abline(slope = 1, intercept = 1, color = "red") +
+          xlab("Predicted values of the testing set") +
+          ylab("Real value of the testing set")  )
+}
+plot(prediction)
 
 ```
 
