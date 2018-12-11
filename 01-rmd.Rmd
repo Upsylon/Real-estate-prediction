@@ -507,16 +507,7 @@ leaflet(all_cities, options = leafletOptions(minZoom = 7.4)) %>%
   all_cities$m2,
   " m2"
   )
-  ) %>%
-  addPopups(
-    6.6322734, 46.5196535, popup = cities[4],
-    options = popupOptions(closeButton = T)
-  ) # %>%
-  # addPopups(
-  #   8.539183, 47.368650, popup = "Zurich",
-  #   options = popupOptions(closeButton = T) 
-  # )
-  #etc. 
+)
 ```
 
 ```{r}

@@ -22,29 +22,21 @@ ui <- shinyUI(fluidPage(
                 #checkboxInput("legend", "Show legend", TRUE) Might be handy later if we get legends.
   # p(), #drity way of making space between map and button
   # actionButton("button", label = "Apply Changes", icon = NULL, width = NULL)
-)
-)
+))
 
-server <- function(input, output, session) {
+server <- function(input, output) {
   
   filteredData <- reactive({
-    all_cities[all_cities$price >= input$rangePrice[1] & all_cities$price <= input$rangePrice[2],]
+    all_cities[all_cities$price >= input$rangePrice[1] & all_cities$price <= input$rangePrice[2] &
+               all_cities$rooms >= input$rangeRooms[1] & all_cities$rooms <= input$rangeRooms[2] &
+               all_cities$m2 >= input$rangeM2[1] & all_cities$m2 <= input$rangeM2[2] &
+               all_cities$city == input$City,]
   })
-  
   
   output$map <- renderLeaflet({
       leaflet(all_cities, options = leafletOptions(minZoom = 7.4)) %>%
       setMaxBounds(5.5, 48.2, 11, 45.3) %>%
       addTiles() # Add default OpenStreetMap map tiles
-        # %>%
-        # for (i in i:(length(unique(all_cities$city)))){
-        #   addPopups(
-        #     lng = summarize(group_by(all_cities, city)[i,], mean(longitude))[,2],
-        #     lat = summarize(group_by(all_cities, city)[i,], mean(latitude))[,2],
-        #     popup = unique(all_cities$city)[i],
-        #     options = popupOptions(closeButton = T)
-        #   )
-        # }
   })
   
   observe({
@@ -52,23 +44,23 @@ server <- function(input, output, session) {
       clearShapes() %>%
       addCircles(
         lng = filteredData()$longitude,
-        lat = filteredData()$latitude)
-      #   popup = paste(
-      #     "<b>Price :</b>",
-      #     filteredData$price,
-      #     "   CHF",
-      #     "<br/>",
-      #     "<b>Adress :</b>",
-      #     filteredData$address,
-      #     "<br/>",
-      #     "<b>Number of rooms :</b>",
-      #     filteredData$rooms,
-      #     "<br/>",
-      #     "<b>Size :</b>",
-      #     filteredData$m2,
-      #     " m2"
-      #   )
-      # )
+        lat = filteredData()$latitude,
+        popup = paste(
+          "<b>Price :</b>",
+          filteredData()$price,
+          "   CHF",
+          "<br/>",
+          "<b>Adress :</b>",
+          filteredData()$address,
+          "<br/>",
+          "<b>Number of rooms :</b>",
+          filteredData()$rooms,
+          "<br/>",
+          "<b>Size :</b>",
+          filteredData()$m2,
+          " m2"
+        )
+      )
   })
 }
 
