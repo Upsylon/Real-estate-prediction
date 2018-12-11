@@ -1,0 +1,75 @@
+library(shiny)
+library(leaflet)
+
+ui <- shinyUI(fluidPage(
+  leafletOutput("map"),
+  absolutePanel(top = 5, right = 25,
+                sliderInput("rangePrice", "Price", min(all_cities$price),
+                            max(all_cities$price),
+                            value = range(all_cities$price), step = 10
+                ),
+                sliderInput("rangeRooms", "Rooms", min(all_cities$rooms),
+                            max(all_cities$rooms),
+                            value = range(all_cities$rooms), step = 0.5
+                ),
+                sliderInput("rangeM2", "Surface in m\u00B2", min(all_cities$m2),
+                            max(all_cities$m2),
+                            value = range(all_cities$m2), step = 1
+                ),
+                selectInput("City", "City",
+                            unique(all_cities$city))
+                )
+                #checkboxInput("legend", "Show legend", TRUE) Might be handy later if we get legends.
+  # p(), #drity way of making space between map and button
+  # actionButton("button", label = "Apply Changes", icon = NULL, width = NULL)
+)
+)
+
+server <- function(input, output, session) {
+  
+  filteredData <- reactive({
+    all_cities[all_cities$price >= input$rangePrice[1] & all_cities$price <= input$rangePrice[2],]
+  })
+  
+  
+  output$map <- renderLeaflet({
+      leaflet(all_cities, options = leafletOptions(minZoom = 7.4)) %>%
+      setMaxBounds(5.5, 48.2, 11, 45.3) %>%
+      addTiles() # Add default OpenStreetMap map tiles
+        # %>%
+        # for (i in i:(length(unique(all_cities$city)))){
+        #   addPopups(
+        #     lng = summarize(group_by(all_cities, city)[i,], mean(longitude))[,2],
+        #     lat = summarize(group_by(all_cities, city)[i,], mean(latitude))[,2],
+        #     popup = unique(all_cities$city)[i],
+        #     options = popupOptions(closeButton = T)
+        #   )
+        # }
+  })
+  
+  observe({
+    leafletProxy("map", data = filteredData()) %>%
+      clearShapes() %>%
+      addCircles(
+        lng = filteredData()$longitude,
+        lat = filteredData()$latitude)
+      #   popup = paste(
+      #     "<b>Price :</b>",
+      #     filteredData$price,
+      #     "   CHF",
+      #     "<br/>",
+      #     "<b>Adress :</b>",
+      #     filteredData$address,
+      #     "<br/>",
+      #     "<b>Number of rooms :</b>",
+      #     filteredData$rooms,
+      #     "<br/>",
+      #     "<b>Size :</b>",
+      #     filteredData$m2,
+      #     " m2"
+      #   )
+      # )
+  })
+}
+
+shinyApp(ui = ui, server = server)
