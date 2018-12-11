@@ -3,28 +3,51 @@ library(leaflet)
 
 ui <- shinyUI(fluidPage(
   leafletOutput("map"),
-  absolutePanel(top = 5, right = 25,
-                sliderInput("rangePrice", "Price", min(all_cities$price),
-                            max(all_cities$price),
-                            value = range(all_cities$price), step = 10
-                ),
-                sliderInput("rangeRooms", "Rooms", min(all_cities$rooms),
-                            max(all_cities$rooms),
-                            value = range(all_cities$rooms), step = 0.5
-                ),
-                sliderInput("rangeM2", "Surface in m\u00B2", min(all_cities$m2),
-                            max(all_cities$m2),
-                            value = range(all_cities$m2), step = 1
-                ),
-                selectInput("City", "City",
-                            unique(all_cities$city))
-                )
+  wellPanel(
+  textInput(inputId = "City", label = "City",
+              value = "Input city names without accent or special character")
+  ,
+  sliderInput("rangePrice", "Price", 0,
+                        10000,
+                        value = range(0,10000), step = 10
+  ),
+  sliderInput("rangeRooms", "Rooms", 1,
+              12,
+              value = range(1,12), step = 0.5
+  ),
+  sliderInput("rangeM2", "Surface in m\u00B2", 0,
+              550,
+              value = range(0,550), step = 1
+  ))
+  # wellPanel(sliderInput("rangePrice", "Price", min(all_cities$price),
+  #                           max(all_cities$price),
+  #                           value = range(all_cities$price), step = 10
+  #               ),
+  #               sliderInput("rangeRooms", "Rooms", min(all_cities$rooms),
+  #                           max(all_cities$rooms),
+  #                           value = range(all_cities$rooms), step = 0.5
+  #               ),
+  #               sliderInput("rangeM2", "Surface in m\u00B2", min(all_cities$m2),
+  #                           max(all_cities$m2),
+  #                           value = range(all_cities$m2), step = 1
+  #               ),
+  #               selectInput("City", "City",
+  #                           unique(all_cities$city))
+  #               )
                 #checkboxInput("legend", "Show legend", TRUE) Might be handy later if we get legends.
   # p(), #drity way of making space between map and button
   # actionButton("button", label = "Apply Changes", icon = NULL, width = NULL)
 ))
 
 server <- function(input, output) {
+  
+  # all_cities <- get_immodata2
+  
+  # filteredData <- reactive({
+  #   all_cities[all_cities$price >= input$rangePrice[1] & all_cities$price <= input$rangePrice[2] &
+  #                all_cities$rooms >= input$rangeRooms[1] & all_cities$rooms <= input$rangeRooms[2] &
+  #                all_cities$m2 >= input$rangeM2[1] & all_cities$m2 <= input$rangeM2[2]]
+  # })
   
   filteredData <- reactive({
     all_cities[all_cities$price >= input$rangePrice[1] & all_cities$price <= input$rangePrice[2] &
