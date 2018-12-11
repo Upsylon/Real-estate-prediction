@@ -79,7 +79,7 @@ server <- function(input, output) {
           filteredData()$predicted_price,
           " CHF",
           "<br/>",
-          "<b>Adress :</b>",
+          "<b>Address :</b>",
           filteredData()$address,
           "<br/>",
           "<b>Number of rooms :</b>",
