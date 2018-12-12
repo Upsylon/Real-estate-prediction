@@ -3,8 +3,12 @@ library(leaflet)
 
 ui <- shinyUI(fluidPage(
   leafletOutput("map"),
-  p(),
-  #drity way of making space between map and button
+  p(), #drity way of making space between map and button
+  column(4,
+         wellPanel(
+           checkboxGroupInput("City", "City",
+                              unique(all_cities$city))
+         )),
   column(8,
          wellPanel(
            sliderInput(
@@ -31,11 +35,6 @@ ui <- shinyUI(fluidPage(
              value = range(all_cities$m2),
              step = 1
            )
-         )),
-  column(4,
-         wellPanel(
-           checkboxGroupInput("City", "City",
-                              unique(all_cities$city))
          ))
 ))
 
@@ -81,6 +80,12 @@ server <- function(input, output) {
           filteredData()$m2,
           " m2"
         )
+      ) %>%
+      fitBounds(
+        min(filteredData()$longitude),
+        min(filteredData()$latitude),
+        max(filteredData()$longitude),
+        max(filteredData()$latitude)
       )
   })
 }
