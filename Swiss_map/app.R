@@ -3,24 +3,40 @@ library(leaflet)
 
 ui <- shinyUI(fluidPage(
   leafletOutput("map"),
-  wellPanel(sliderInput("rangePrice", "Price", min(all_cities$price),
-                            max(all_cities$price),
-                            value = range(all_cities$price), step = 10
-                ),
-                sliderInput("rangeRooms", "Rooms", min(all_cities$rooms),
-                            max(all_cities$rooms),
-                            value = range(all_cities$rooms), step = 0.5
-                ),
-                sliderInput("rangeM2", "Surface in m\u00B2", min(all_cities$m2),
-                            max(all_cities$m2),
-                            value = range(all_cities$m2), step = 1
-                ),
-                selectInput("City", "City",
-                            unique(all_cities$city))
-                )
-                #checkboxInput("legend", "Show legend", TRUE) Might be handy later if we get legends.
-  # p(), #drity way of making space between map and button
-  # actionButton("button", label = "Apply Changes", icon = NULL, width = NULL)
+  p(),
+  #drity way of making space between map and button
+  column(8,
+         wellPanel(
+           sliderInput(
+             "rangePrice",
+             "Price",
+             min(all_cities$price),
+             max(all_cities$price),
+             value = range(all_cities$price),
+             step = 10
+           ),
+           sliderInput(
+             "rangeRooms",
+             "Rooms",
+             min(all_cities$rooms),
+             max(all_cities$rooms),
+             value = range(all_cities$rooms),
+             step = 0.5
+           ),
+           sliderInput(
+             "rangeM2",
+             "Surface in m\u00B2",
+             min(all_cities$m2),
+             max(all_cities$m2),
+             value = range(all_cities$m2),
+             step = 1
+           )
+         )),
+  column(4,
+         wellPanel(
+           checkboxGroupInput("City", "City",
+                              unique(all_cities$city))
+         ))
 ))
 
 server <- function(input, output) {
