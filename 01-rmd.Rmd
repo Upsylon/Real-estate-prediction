@@ -8,7 +8,7 @@ output:
     highlight: tango
 ---
 
-```{r message=FALSE, warning=FALSE}
+```{r message = FALSE, warning = FALSE, echo = FALSE}
 library(robotstxt)
 library(xml2)
 library(rvest)
@@ -18,543 +18,146 @@ library(dplyr)
 library(plotly)
 library(ggmap)
 library(googleway)
+library(kableExtra)
 library(leaflet)
 library(caret)
+library(googleway)
+# devtools::install_github("vincentlomazzi/swissimmo")
 library(swissimmo)
 ```
 
+# Introduction
+
+## Objectives 
+
+... what we want to achieve...
+
+## Methodology
+
+... How we achieve it... 
+
+# Modelling
+
+## Legal check
+
+Before beginning anything, we have to be sure that we are respecting the utilization conditions of Immoscout24.  
+Therefore, we look if the path to which we will webscrapp the data is allowed by the website.
+
+```{r}
+paths_allowed(paths = "/en/real-estate/rent/city/",
+              domain = "https://www.immoscout24.ch")
+
+# get_robotstxt(domain = "https://www.immoscout24.ch")
+```
+
+We see that the path is allowed and not restricted in the robots.txt of the website. We can begin our analysis.
+
+## Webscrapping 
+
+The first step of our process is to webscrapp the data from Immoscout24.  
+
+In order to perform our analysis, we first would like to have all relevant informations concerning the housings for different cities of interest.  
+
+Thus, for given cities, we would like to retrieve all housings that are currently published for renting and their respective number of rooms, square meters, price and address. 
+
+Thanks to the function *get_immodata* from the *swissimmo* package that we created and that is available publicly on github, we can retrieve all these informations. 
+
+This function takes as an argument a vector containing the names of the cities for which the user would like to webscrap the data and returns a tidy dataframe with all relevant informations.  
+More information are available using the help of the function.
+
+As an example, we propose you to run the following to have the data related to Bussigny and Nyon.
+
+```{r}
+cities <- get_immodata(c("bussigny", "nyon"))
+```
+
+The data is collected in a dataframe. Each row is an observation and the columns contain the relevant informations. Below the first rows of the created dataframe.
+
+```{r}
+head(cities)
+```
+
+Having a clean dataframe is great. A lot of descriptive analysis could already be performed.  
+However, it could be interesting to have a model predicting the price of the housings and to compare them to their actual renting price. This could enable to see if a flat is overpriced or underprice. 
+
+## Predicting "Market Prices"
+
+Thanks to the *predict_price* function of the same *swissimmo* package, it is possible to forecast the prices of the different housings based on their characteristics.  
+
+This function allows to either use as input the number of rooms, square meters and city of a housing in  which the user might be interested or a dataframe that contains this different columns (typically, a dataframe that has been obtrained thaks to the *get_immodata()* function.  
+
+The function returns the estimated prices of the single housing when rooms, m2 and city are given, or the inputted dataframe to which a new column for the estimated price has been added.  
+
+The user can also specify the model that should be used. This model should be supported as a regression model by the *"caret"* package (see [available models](http://topepo.github.io/caret/available-models.html) ).
+After having tested different models and used a cross-validation procedure to assess their performance, we would advise the users to use the random forest ("rf") that offers the lowest RMSE. However, this model could be innappropriate in some cases and it the user might use his intuition to find a more appropriate one.  
+Note that, as the main goal of this report is not to present forecasting methods, the model used are not tuned and using the defaut parameters from the *caret* package. 
+
+First, we can retrieve the estimated price for an appartment of 59 m2 and 3 rooms located in Nyon.
+
+```{r, note = FALSE}
+predict_price(rooms = 3, m2 = 59, city = "nyon")
+```
+
+The estimated price and a message telling us that this price has been computed for a single housing and not for a dataframe are prompted.  
+Otherwise, if we analyse a whole city and not a single housing, it is possible to directly use as an input a dataframe.  
+
+As an example, we can use this function using as an input the object *cities* that we created before.  
+
+```{r}
+predictions <- predict_price(cities)
+```
+
+*Note*: warnings or errors might be displayed if the user uses too much or too few parameters...
+
+Rather than having only the predicted prices as output, this new object *prediction* uses the S3 methodology. The class *pred* has been assigned to this object.  
+We can directly retrieve the original dataframe to which a column *predicted_price* has been added thanks to the *summary* function (see *summary.pred* for help as the S3 methodology is used) of this object.  
+
+Below, the result of the *summary* function for the previously created *predictions* object. 
+
 ```{r, echo = FALSE}
-my_theme <- function(base_size = 10, base_family = "sans") {
-  theme_minimal(base_size = base_size, base_family = base_family) +
-    theme(
-      axis.text = element_text(size = 10),
-      axis.text.x = element_text(vjust = 0.5, hjust = 0.5),
-      axis.title = element_text(size = 12),
-      plot.title = element_text(hjust = 0.5),
-      panel.grid.major = element_line(color = "grey"),
-      panel.grid.minor = element_blank(),
-      panel.background = element_rect(fill = "aliceblue"),
-      strip.background = element_rect(fill = "lightgrey", 
-                                      color = "grey", size = 1),
-      strip.text = element_text(face = "bold", size = 10, color = "black"),
-      legend.position = "bottom",
-      legend.justification = "top", 
-      legend.box = "horizontal",
-      legend.box.background = element_rect(colour = "grey50"),
-      legend.background = element_blank(),
-      panel.border = element_rect(color = "grey", fill = NA, size = 0.5)
-    )
-}
+summary(predictions) %>% 
+  kable(caption = "10 first rows of the output of the summary function") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
+                full_width = T) %>%
+  scroll_box(width = "65%", height = "250px")
+  
 ```
 
-```{r}
-get_immodata <- function(city_vector) {
-  
-  ### Getting all the cities in the form of a "list of lists"
-  cities <- list()
-  
-  for (i in 1:length(city_vector)) {
-  cities[[i]] <- list()
-    names(cities)[i] = paste(city_vector[i])
-  }
-  
-  ### Getting the URL of each cities in new variables linked to each of them:
-  for (i in 1:length(cities)){
-  attr(cities[[i]], which="url") <- paste(
-    "https://www.immoscout24.ch/en/real-estate/rent/city-", 
-    names(cities[i]), sep="") 
-}
-  
-  ### Getting the number of pages for each cities
-  pages <- list()
-for( i in 1:length(cities)){
-  pages[[i]] <- read_html(x = paste0(unlist(attributes(cities[[i]]), 
-                                            use.names = FALSE))) %>%
-    html_nodes(css = ".cXTlXt") %>%
-    html_text() %>%
-    as.numeric() %>%
-    max(na.rm = TRUE) %>%
-    subtract(e2 = 1) %>%
-    seq(from = 1) 
-}
-  
-  ### Scrapping everything
-  for (i in 1:length(cities)){
-  for (page in pages[[i]]){  
-    url_path_page_immoscout <- cities[[i]] %>% 
-      attributes %>% 
-      unlist(use.names = FALSE) %>% 
-      paste0 %>%
-      paste("?pn=", page, sep="") 
-    
-    cities[[i]][[page]] <- list()
-    cities[[i]][[page]] <- read_html(url_path_page_immoscout) %>% 
-      html_nodes(".csgoYM") %>%
-      html_text()
-  }
-}
-  
-  # unlisting
-  unlisted_cities <- unlist(cities) %>% data.frame
-  
-all_cities  <- data.frame()
-for (i in 1:length(cities)) {
-  item_full_info <- unlisted_cities[grep(names(cities[i]), 
-                                         rownames(unlisted_cities)),] 
-  #extract number of rooms
-  
+The new dataframe contains all relevant informations, including the estimated market price to which it should be sold and will be used later for a shiny app illustration based on the Swiss map. 
 
-  assign(paste("df_", names(cities[i]), sep=""),  
-         data.frame(
-           rooms = str_extract(item_full_info, ".*m\u00B2") %>%
-             # first taking before m2 for the cases where the word "room" or "rooms" 
-             # is mentionned in the description
-             str_extract(., ".*rooms*") %>% 
-             gsub(pattern = " rooms", replacement = "", fixed = TRUE) %>%
-             gsub(pattern = " room", replacement = "", fixed = TRUE) %>% 
-             as.numeric
-           ,
-           
-           # Extract Size
-           m2 = str_extract(item_full_info, ".*m\u00B2\u00AB") %>%
-             str_extract(., ", .*") %>%
-             gsub(pattern=" m\u00B2\u00AB", replacement = "", fixed = TRUE) %>%
-             gsub(pattern= ", ", replacement = "", fixed = TRUE) 
-           %>% as.integer
-           ,
-           
-           # Extract localiation
-           address =  str_extract(item_full_info, ".*Close") %>%
-             str_extract(., ".*,") %>%
-             str_extract(., "\u00bb.*") %>%
-             gsub(pattern = "Close", replacement = "", fixed = TRUE) %>%
-             gsub(pattern = ",", replacement = "", fixed = TRUE) %>%
-             gsub(pattern = "\u00bb", replacement = "", fixed = TRUE) %>%
-             gsub(pattern = "\u00FC", replacement = "u", fixed = TRUE) %>%
-             gsub(pattern = "\u00E4", replacement = "a", fixed = TRUE) %>%
-             gsub(pattern = "\u00F6", replacement = "o", fixed = TRUE) %>%
-             gsub(pattern = "\u00E8", replacement = "e", fixed = TRUE) %>%
-             gsub(pattern = "\u00E9", replacement = "e", fixed = TRUE) %>%
-             gsub(pattern = "\u00EA", replacement = "e", fixed = TRUE) %>%
-             gsub(pattern = "\u00F4", replacement = "o", fixed = TRUE) %>%
-             gsub(pattern = "\u00EF", replacement = "i", fixed = TRUE)
-           ,
-           
-           #extract price
-           price = str_extract(item_full_info, "eCHF .*") %>% str_extract(., ".*.\u2014 *") %>% 
-             gsub(pattern = "eCHF ", replacement = "", fixed = TRUE) %>%
-             gsub(pattern = ".\u2014", replacement = "", fixed = TRUE) %>%
-             gsub(pattern = ",", replacement = "", fixed = TRUE) %>% as.integer
-           ,
-           
-           # Assign the city
-           city = names(cities[i])
-         )
-         )
+For the moment, one could be interesting to retrieve a graph showing the actual prices against the predicted prices of the different housings to be able to see which one are over/under estimated.  
 
-  city <-  data.frame(
-    rooms = str_extract(item_full_info, ".*\u00AB") %>%
-      # first taking before m2 for the cases where the word "room" or "rooms" 
-      # is mentionned in the description
-      str_extract(., ".*room") %>% 
-      gsub(pattern = " room", replacement = "", fixed = TRUE) %>% 
-      as.numeric
-    ,
-    
-    # Extract Size
-    m2 = str_extract(item_full_info, ".*m\u00B2\u00AB") %>%
-      # str_extract(., ", .*") %>%
-      gsub(pattern=" m\u00B2\u00AB", replacement = "", fixed = TRUE) %>% 
-      word(.,-1) %>% 
-      as.integer
-    ,
-    
-    #extract price
-    price = str_extract(item_full_info, "eCHF .*") %>% 
-      str_extract(., ".*.\u2014 *") %>% 
-      gsub(pattern = "eCHF ", replacement = "", fixed = TRUE) %>%
-      gsub(pattern = ".\u2014", replacement = "", fixed = TRUE) %>%
-      gsub(pattern = ",", replacement = "", fixed = TRUE) %>% 
-      as.integer
-    ,
-    
-    # Extract localiation
-    address =  str_extract(item_full_info, ".*Close") %>%
-      str_extract(., ".*,") %>%
-      str_extract(., "\u00bb.*") %>%
-      gsub(pattern = "Close", replacement = "", fixed = TRUE) %>%
-      gsub(pattern = ",", replacement = "", fixed = TRUE) %>%
-      gsub(pattern = "\u00bb", replacement = "", fixed = TRUE) %>%
-      gsub(pattern = "\u00FC", replacement = "u", fixed = TRUE) %>%
-      gsub(pattern = "\u00E4", replacement = "a", fixed = TRUE) %>%
-      gsub(pattern = "\u00F6", replacement = "o", fixed = TRUE) %>%
-      gsub(pattern = "\u00E8", replacement = "e", fixed = TRUE) %>%
-      gsub(pattern = "\u00E9", replacement = "e", fixed = TRUE) %>%
-      gsub(pattern = "\u00EA", replacement = "e", fixed = TRUE) %>%
-      gsub(pattern = "\u00F4", replacement = "o", fixed = TRUE) %>%
-      gsub(pattern = "\u00EF", replacement = "i", fixed = TRUE) %>%
-      gsub(pattern = "\u00EB", replacement = "e", fixed = TRUE) %>%
-      gsub(pattern = "\u00EE", replacement = "e", fixed = TRUE) %>%
-      gsub(pattern = "\u00E7", replacement = "c", fixed = TRUE) %>%
-      gsub(pattern = "\u00E2", replacement = "a", fixed = TRUE) 
-    ,
-    
-    postcode = str_extract(item_full_info, ".*Close") %>%
-      str_extract(., ".*,") %>%
-      str_extract(., "\u00bb.*") %>%
-      gsub(pattern = "Close", replacement = "", fixed = TRUE) %>%
-      gsub(pattern = ",", replacement = "", fixed = TRUE) %>% 
-      gsub(pattern = "\u00bb", replacement = "", fixed = TRUE)  %>%
-      word(., -2),
-    
-    city = str_extract(item_full_info, ".*Close") %>%
-      str_extract(., ".*,") %>%
-      str_extract(., "\u00bb.*") %>%
-      gsub(pattern = "Close", replacement = "", fixed = TRUE) %>%
-      gsub(pattern = ",", replacement = "", fixed = TRUE) %>% 
-      gsub(pattern = "\u00bb", replacement = "", fixed = TRUE) %>%
-      gsub(pattern = "\u00FC", replacement = "u", fixed = TRUE) %>%
-      gsub(pattern = "\u00E8", replacement = "e", fixed = TRUE) %>%
-      word(., -1)
-  )
-  all_cities <- rbind(all_cities, city)
-}
-
-# selecting only prices > 500 to get rid off most of wrong recorder data
-# and weakly rents
-all_cities <- all_cities[all_cities$price > 300,]
-
-# Deleting rows where we have NA (about 16% of the data)
-all_cities <- all_cities[complete.cases(all_cities),] 
-
-  return(all_cities)
-}
-
-# The function enables to scrap all the data (except longitude/latitude) at once
-
-all_cities <- get_immodata(c("zurich", "geneve", "basel", "lausanne"))
-```
-
-
-# Webscrapping
-
-Example data structure de Iegor a rearranger
-
-```{r}
-cities <- list(
-  zurich = list(),
-  geneve = list(),
-  basel = list(),
-  lausanne = list(),
-  bern = list(),
-  winterthur = list(),
-  lucerne = list(),
-  lugano = list()
-  )
-```
-
-
-## Immoscout
-
-Is the path allowed for each city? 
+To do this, we can again use our *predictions* object that we created before, and plot it with the *plot* function (*?plot.pred* to see the help).  
+In this graph, the values below the lines are the one with estimated values higher than the actual values. These housing are underestimated.  
+In order to be able to retrieve these points of interest, the function incorporates a ShinyApp..  
+It is possible to click on the different points or to brush many at the same time to retrieve their informations.  
+This function has to be runned directly in the console to work efficiently as it uses a ShinyApp.
 
 ```{r, eval = FALSE}
-paths_allowed(paste(paths="/en/real-estate/rent/city/", cities, sep=""),
-              domain="https://www.immoscout24.ch")
-get_robotstxt(domain="https://www.immoscout24.ch")
-```
---> Yes 
-
-
-LOOPING OVER EACH CITY
-
-Getting the URL of each cities in new variables linked to each of them:
-
-
-```{r}
-for (i in 1:length(cities)){
-  attr(cities[[i]], which="url") <- paste(
-    "https://www.immoscout24.ch/en/real-estate/rent/city-", 
-    names(cities[i]), sep="") 
-}
+plot(predictions) # to be ran in the console
 ```
 
-```{r}
-pages <- list()
-for( i in 1:length(cities)){
-  pages[[i]] <- read_html(x = paste0(unlist(attributes(cities[[i]]), 
-                                            use.names = FALSE))) %>%
-    html_nodes(css = ".cXTlXt") %>%
-    html_text() %>%
-    as.numeric() %>%
-    max(na.rm = TRUE) %>%
-    subtract(e2 = 1) %>%
-    seq(from = 1) 
-}
-```
+The next step of our process will be to use the different data that we recorded till here and to plot each housing with their different characteristics on an interactive map of Switzerland. To do this, we would need the geographical coordinates (longitude and latitude) of each housing.  
 
+The tool that we decide to use is using *GoogleMaps* and retrieves these coordinates based on the address that are inputted. 
+However, this feature requires an API key provided by *Google* is not free of charged passed a certain limit. Moreover, this feature requires quite some time to be ran.  
 
-Scrapping everything at once:
-```{r}
-for (i in 1:length(cities)){
-  for (page in pages[[i]]){  
-    url_path_page_immoscout <- cities[[i]] %>% 
-      attributes %>% 
-      unlist(use.names = FALSE) %>% 
-      paste0 %>%
-      paste("?pn=", page, sep="") 
-    
-    cities[[i]][[page]] <- list()
-    cities[[i]][[page]] <- read_html(url_path_page_immoscout) %>% 
-      html_nodes(".csgoYM") %>%
-      html_text()
-  }
-}
-```
+For more convenience, we provide you a dataframe which is the result of the function *get_immodata2* that can be used after having received the adequate key (if you have interest in running this function, use the function *set_key()* with the provided key. 
+This function is an amelioration of our first *get_immodata* function and directly provides all the information webscrapped, the longitude, the latitude and the predicted price.  
 
-Creating one big dataframe with all values of all cities to be used later (not cleaned yet) 
-```{r}
-unlisted_cities <- unlist(cities) %>% data.frame
-```
+The following dataframe is the result of this function used on the 8 biggest cities of Switzerland. 
 
-
-
-Iegor's code
-```{r}
-item_full_info <- read_html(
-  "https://www.immoscout24.ch/en/real-estate/rent/city-lausanne?pn=1") %>%
-  html_nodes(".csgoYM") %>%
-  html_text()
-```
-
-
-Creating a dataframe for each city
-
-Getting only the big dataframe (named all_cities) directly without creating "subdataframes"
-
-```{r}
-all_cities <- data.frame()
-for (i in 1:length(cities)) {
-  item_full_info <- unlisted_cities[grep(names(cities[i]), 
-                                         rownames(unlisted_cities)),] 
-  #extract number of rooms
-  
-
-  assign(paste("df_", names(cities[i]), sep=""),  
-         data.frame(
-           rooms = str_extract(item_full_info, ".*m\u00B2") %>%
-             # first taking before m2 for the cases where the word "room" or "rooms" 
-             # is mentionned in the description
-             str_extract(., ".*rooms*") %>% 
-             gsub(pattern = " rooms", replacement = "", fixed = TRUE) %>%
-             gsub(pattern = " room", replacement = "", fixed = TRUE) %>% 
-             as.numeric
-           ,
-           
-           # Extract Size
-           m2 = str_extract(item_full_info, ".*m\u00B2\u00AB") %>%
-             str_extract(., ", .*") %>%
-             gsub(pattern=" m\u00B2\u00AB", replacement = "", fixed = TRUE) %>%
-             gsub(pattern= ", ", replacement = "", fixed = TRUE) 
-           %>% as.integer
-           ,
-           
-           # Extract localiation
-           address =  str_extract(item_full_info, ".*Close") %>%
-             str_extract(., ".*,") %>%
-             str_extract(., "\u00bb.*") %>%
-             gsub(pattern = "Close", replacement = "", fixed = TRUE) %>%
-             gsub(pattern = ",", replacement = "", fixed = TRUE) %>%
-             gsub(pattern = "\u00bb", replacement = "", fixed = TRUE) %>%
-             gsub(pattern = "\u00FC", replacement = "u", fixed = TRUE) %>%
-             gsub(pattern = "\u00E4", replacement = "a", fixed = TRUE) %>%
-             gsub(pattern = "\u00F6", replacement = "o", fixed = TRUE) %>%
-             gsub(pattern = "\u00E8", replacement = "e", fixed = TRUE) %>%
-             gsub(pattern = "\u00E9", replacement = "e", fixed = TRUE) %>%
-             gsub(pattern = "\u00EA", replacement = "e", fixed = TRUE) %>%
-             gsub(pattern = "\u00F4", replacement = "o", fixed = TRUE) %>%
-             gsub(pattern = "\u00EF", replacement = "i", fixed = TRUE)
-           ,
-           
-           #extract price
-           price = str_extract(item_full_info, "eCHF .*") %>% str_extract(., ".*.\u2014 *") %>% 
-             gsub(pattern = "eCHF ", replacement = "", fixed = TRUE) %>%
-             gsub(pattern = ".\u2014", replacement = "", fixed = TRUE) %>%
-             gsub(pattern = ",", replacement = "", fixed = TRUE) %>% as.integer
-           ,
-           
-           # Assign the city
-           city = names(cities[i])
-         )
-         )
-
-  city <-  data.frame(
-    rooms = str_extract(item_full_info, ".*\u00AB") %>%
-      # first taking before m2 for the cases where the word "room" or "rooms" 
-      # is mentionned in the description
-      str_extract(., ".*room") %>% 
-      gsub(pattern = " room", replacement = "", fixed = TRUE) %>% 
-      as.numeric
-    ,
-    
-    # Extract Size
-    m2 = str_extract(item_full_info, ".*m\u00B2\u00AB") %>%
-      # str_extract(., ", .*") %>%
-      gsub(pattern=" m\u00B2\u00AB", replacement = "", fixed = TRUE) %>% 
-      word(.,-1) %>% 
-      as.integer
-    ,
-    
-    #extract price
-    price = str_extract(item_full_info, "eCHF .*") %>% 
-      str_extract(., ".*.\u2014 *") %>% 
-      gsub(pattern = "eCHF ", replacement = "", fixed = TRUE) %>%
-      gsub(pattern = ".\u2014", replacement = "", fixed = TRUE) %>%
-      gsub(pattern = ",", replacement = "", fixed = TRUE) %>% 
-      as.integer
-    ,
-    
-    # Extract localiation
-    address =  str_extract(item_full_info, ".*Close") %>%
-      str_extract(., ".*,") %>%
-      str_extract(., "\u00bb.*") %>%
-      gsub(pattern = "Close", replacement = "", fixed = TRUE) %>%
-      gsub(pattern = ",", replacement = "", fixed = TRUE) %>%
-      gsub(pattern = "\u00bb", replacement = "", fixed = TRUE) %>%
-      gsub(pattern = "\u00FC", replacement = "u", fixed = TRUE) %>%
-      gsub(pattern = "\u00E4", replacement = "a", fixed = TRUE) %>%
-      gsub(pattern = "\u00F6", replacement = "o", fixed = TRUE) %>%
-      gsub(pattern = "\u00E8", replacement = "e", fixed = TRUE) %>%
-      gsub(pattern = "\u00E9", replacement = "e", fixed = TRUE) %>%
-      gsub(pattern = "\u00EA", replacement = "e", fixed = TRUE) %>%
-      gsub(pattern = "\u00F4", replacement = "o", fixed = TRUE) %>%
-      gsub(pattern = "\u00EF", replacement = "i", fixed = TRUE) %>%
-      gsub(pattern = "\u00EB", replacement = "e", fixed = TRUE) %>%
-      gsub(pattern = "\u00EE", replacement = "e", fixed = TRUE) %>%
-      gsub(pattern = "\u00E7", replacement = "c", fixed = TRUE) %>%
-      gsub(pattern = "\u00E2", replacement = "a", fixed = TRUE) 
-    ,
-    
-    postcode = str_extract(item_full_info, ".*Close") %>%
-      str_extract(., ".*,") %>%
-      str_extract(., "\u00bb.*") %>%
-      gsub(pattern = "Close", replacement = "", fixed = TRUE) %>%
-      gsub(pattern = ",", replacement = "", fixed = TRUE) %>% 
-      gsub(pattern = "\u00bb", replacement = "", fixed = TRUE)  %>%
-      word(., -2),
-    
-    city = str_extract(item_full_info, ".*Close") %>%
-      str_extract(., ".*,") %>%
-      str_extract(., "\u00bb.*") %>%
-      gsub(pattern = "Close", replacement = "", fixed = TRUE) %>%
-      gsub(pattern = ",", replacement = "", fixed = TRUE) %>% 
-      gsub(pattern = "\u00bb", replacement = "", fixed = TRUE) %>%
-      gsub(pattern = "\u00FC", replacement = "u", fixed = TRUE) %>%
-      gsub(pattern = "\u00E8", replacement = "e", fixed = TRUE) %>%
-      word(., -1)
-  )
-  all_cities <- rbind(all_cities, city)
-}
-
-# selecting only prices > 500 to get rid off most of wrong recorder data
-# and weakly rents
-all_cities <- all_cities[all_cities$price > 300,]
-all_cities <- all_cities[all_cities$price < 10000,]
-
-# Deleting rows where we have NA (about 16% of the data)
-all_cities <- all_cities[complete.cases(all_cities),] 
-
-all_cities <- cbind(all_cities, latitude = NA, longitude = NA)
-```
 
 ```{r}
 all_cities <- readRDS(file = "all_cities.rds")
-all_cities <- all_cities %>% filter(city == "Lausanne")
 ```
 
-
-#### Get prices predictions
-```{r}
-predictions <- predict_price(all_cities)
-
-all_cities <- summary(predictions)
-
-all_cities$predicted_price <- round(all_cities$predicted_price, digits = 0)
-
-# Convert predicted_prices into list
-all_cities$predicted_price <- as.numeric(unlist(all_cities$predicted_price))
-```
-
-#### Genereting map 
-
-```{r}
-# library(googleway)
-# API key obtained with the test period (google)
-# set_key("AIzaSyBQd93y1YsbrWKxMgnaRXoX0Wg6F-fiCqc")
-
-# Create a df with raw information about the address coordinates
-# raw_coordinates <- google_geocode(address = "Via Monte Carmen 8 6900 Lugano")
-
-
-# Create a df with raw information about the address coordinates
-# raw_coordinates <- google_geocode(address = "avenue de l'église anglaise 10 1006 lausanne")
-
-# Create a df with only a column lng and a column ltd
-# coordinates_df <- raw_coordinates$results$geometry$location
-
-# Using leaflet package to map the coordinates
-leaflet(all_cities, options = leafletOptions(minZoom = 7.4)) %>%
-  setMaxBounds(5.5, 48.2, 11, 45.3) %>%
-  addTiles() %>%
-  addCircles(
-  lng = all_cities$longitude,
-  lat = all_cities$latitude,
-  color = ifelse(all_cities$price < all_cities$predicted_price, "green", "red"),
-  popup = paste(
-  "<b>Price :</b>",
-  all_cities$price,
-  "   CHF",
-  "<br/>",
-  "<b>Predicted price :</b>",
-  all_cities$predicted_price,
-  " CHF",
-  "<br/>",
-  "<b>Adress :</b>",
-  all_cities$address,
-  "<br/>",
-  "<b>Number of rooms :</b>",
-  all_cities$rooms,
-  "<br/>",
-  "<b>Size :</b>",
-  all_cities$m2,
-  " m2"
-  
-  )
-)
-```
-
-```{r}
-
-# GEOCODING FOR ALL THE ADDRESSES
-
-# for (i in 2911:nrow(all_cities)) {
-#   
-#   location <- google_geocode(
-#     as.vector(all_cities$address[i])
-#   )$results$geometry$location
-#   
-#   if(!is.null(location)) {
-#     all_cities[i, "latitude"] <- location$lat[1]
-#     all_cities[i, "longitude"] <- location$lng[1]
-#     
-#   }
-# }
-
-# write.csv(all_cities, file = "all_cities.csv")
-```
+# Shiny App
 
 
 
+
+# Annexes
 
 ```{r}
 # After having tested multiple models with the caret package, we observe that
@@ -600,10 +203,10 @@ index.train <- createDataPartition(y = all_cities$price, p = 0.7, list = FALSE)
 train_set <- all_cities[index.train,]
 test_set <- all_cities[-index.train,]
 
-rf_price <- randomForest::randomForest(price ~ rooms + m2 + city, 
-                                            data = train_set,
-                                            ntree = 500, 
-                                            mtry = 3)
+rf_price <- randomForest::randomForest(price ~ rooms + m2 + city,
+                                       data = train_set,
+                                       ntree = 500,
+                                       mtry = 3)
 
 # The predicted values on the testing set
 predictions <- predict(rf_price, newdata = test_set)
@@ -611,77 +214,14 @@ predictions <- predict(rf_price, newdata = test_set)
 # RMSE
 (predict(rf_price, newdata = test_set) - test_set$price) ^ 2 %>% mean %>% sqrt
 
-# The plot of the predictions against the real values
+# The plot of the real values against the predictions
 ggplot() + 
   geom_point(aes(x = predict(rf_price, newdata = test_set), y = test_set$price)) +
   my_theme() +
   geom_abline(slope = 1, intercept = 1, color = "red") +
   xlab("Predicted values of the testing set") +
   ylab("Real value of the testing set") 
-
-# Now, we now that the random forest is the model to choose and we can build a 
-# new one on the whole dataset. Of course, we have overfitting as we predict
-# instances that we already know.
-
-
-
-predict_price <- function(housings, rooms, m2, city, model = "rf", seed = 1) {
-
-  set.seed(seed)
-  
-  if (missing(housings) && (missing(rooms) || missing(m2) || missing(city))){
-    message("Please enter an appropriate dataframe or complete informations")
-  } else if (missing(housings) && !missing(rooms) && !missing(m2) && !missing(city)) {
-    message("The output is the estimated price for an unique housing")
-  } else if (
-    !missing(housings) && (!missing(rooms) || !missing(m2) || !missing(city))
-    ) { 
-    message("The output will be calculated based only on the dataframe")
-  }
-  
-  if (!missing(housings)) {
-  
-    model_used <- train(form = price ~ rooms + m2 + city,
-                        data = housings,
-                        method = model)
-  
-  predictions <- predict(model_used)
-  
-  housings <- housings %>% mutate(predicted_price = predictions)
-  
-  return(housings)
-  }
-  
-  if (missing(housings) && !missing(rooms) && !missing(m2) && !missing(city)) {
-    housings <- get_immodata(city)
-    
-    model_used <- train(form = price ~ rooms + m2,
-                        data = housings,
-                        method = model)
-    prediction <- predict(model_used, newdata = city)
-    
-    return(prediction)
-  }
-}
-predict_price(city = "crissier", rooms = 2, m2 = 22)
-
-cities <- get_immodata(c("crissier", "muttenz"))
-predict_price(cities)
-# gam
-# lm
-# rf
-# nnet
-# svmRadialCost
-# rpart
-# etc.
-
-ggplot() + 
-  geom_point(aes(x = predict(rf_price), y = housings$price)) +
-  my_theme() +
-  geom_abline(slope = 1, intercept = 1, color = "red") +
-  xlab("Predicted values of the testing set") +
-  ylab("Real value of the testing set") 
-
 ```
+Now, we now that the random forest is the model to choose and we can build a new one on the whole dataset. Of course, we have overfitting as we predict instances that we already know.
 
 
