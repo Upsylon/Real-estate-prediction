@@ -7,32 +7,32 @@ ui <- shinyUI(fluidPage(
   column(4,
          wellPanel(
            checkboxGroupInput("City", "City",
-                              unique(all_cities$city))
+                              unique(all_cities2$city))
          )),
   column(8,
          wellPanel(
            sliderInput(
              "rangePrice",
              "Price",
-             min(all_cities$price),
-             max(all_cities$price),
-             value = range(all_cities$price),
+             min(all_cities2$price),
+             max(all_cities2$price),
+             value = range(all_cities2$price),
              step = 10
            ),
            sliderInput(
              "rangeRooms",
              "Rooms",
-             min(all_cities$rooms),
-             max(all_cities$rooms),
-             value = range(all_cities$rooms),
+             min(all_cities2$rooms),
+             max(all_cities2$rooms),
+             value = range(all_cities2$rooms),
              step = 0.5
            ),
            sliderInput(
              "rangeM2",
              "Surface in m\u00B2",
-             min(all_cities$m2),
-             max(all_cities$m2),
-             value = range(all_cities$m2),
+             min(all_cities2$m2),
+             max(all_cities2$m2),
+             value = range(all_cities2$m2),
              step = 1
            )
          ))
@@ -41,26 +41,31 @@ ui <- shinyUI(fluidPage(
 server <- function(input, output) {
   
   filteredData <- reactive({
-    all_cities[all_cities$price >= input$rangePrice[1] & all_cities$price <= input$rangePrice[2] &
-               all_cities$rooms >= input$rangeRooms[1] & all_cities$rooms <= input$rangeRooms[2] &
-               all_cities$m2 >= input$rangeM2[1] & all_cities$m2 <= input$rangeM2[2] &
-               all_cities$city == input$City,]
+    all_cities2[all_cities2$price >= input$rangePrice[1] & all_cities2$price <= input$rangePrice[2] &
+               all_cities2$rooms >= input$rangeRooms[1] & all_cities2$rooms <= input$rangeRooms[2] &
+               all_cities2$m2 >= input$rangeM2[1] & all_cities2$m2 <= input$rangeM2[2] &
+               all_cities2$city == input$City,]
   })
   
   output$map <- renderLeaflet({
-      leaflet(all_cities, options = leafletOptions(minZoom = 7.4)) %>%
+      leaflet(all_cities2, options = leafletOptions(minZoom = 7.4)) %>%
       setMaxBounds(5.5, 48.2, 11, 45.3) %>%
       addTiles() # Add default OpenStreetMap map tiles
   })
   
+pred_color <- ifelse(all_cities2$price < all_cities2$predicted_price, "blue", "red")
+  
   observe({
     leafletProxy("map", data = filteredData()) %>%
-      clearShapes() %>%
+      #clearShapes() %>%
       addCircles(
         radius = 20,
         lng = filteredData()$longitude,
         lat = filteredData()$latitude,
-        color = ifelse(all_cities$price < all_cities$predicted_price, "green", "red"),
+        #color = ifelse(all_cities2$price <= all_cities2$predicted_price, "green", "red"),
+        color = pred_color,
+        stroke = TRUE,
+        fillColor = "transparent",
         popup = paste(
           "<b>Price :</b>",
           filteredData()$price,

@@ -130,7 +130,7 @@ For the moment, one could be interesting to retrieve a graph showing the actual 
 To do this, we can again use our *predictions* object that we created before, and plot it with the *plot* function (*?plot.pred* to see the help).  
 In this graph, the values below the lines are the one with estimated values higher than the actual values. These housing are underestimated.  
 In order to be able to retrieve these points of interest, the function incorporates a ShinyApp..  
-It is possible to click on the different points or to brush many at the same time to retrieve their informations.  
+It is possible to click on the different points or to brush many at the same time to retrieve their informations. The pop-up window gives main informations about the good (price, estimed price, adress, etc).
 This function has to be runned directly in the console to work efficiently as it uses a ShinyApp.
 
 ```{r, eval = FALSE}
