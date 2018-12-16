@@ -53,19 +53,16 @@ server <- function(input, output) {
       addTiles() # Add default OpenStreetMap map tiles
   })
   
-pred_color <- ifelse(all_cities$price < all_cities$predicted_price, "blue", "red")
-  
   observe({
     leafletProxy("map", data = filteredData()) %>%
-      #clearShapes() %>%
+      clearShapes() %>%
       addCircles(
-        radius = 20,
+        radius = 70,
         lng = filteredData()$longitude,
         lat = filteredData()$latitude,
-        #color = ifelse(all_cities$price <= all_cities$predicted_price, "green", "red"),
-        color = pred_color,
-        stroke = TRUE,
-        fillColor = "transparent",
+        color = ifelse(all_cities$price <= all_cities$predicted_price, "green", "red"),
+        stroke = FALSE,
+        fillOpacity = 1,
         popup = paste(
           "<b>Price :</b>",
           filteredData()$price,

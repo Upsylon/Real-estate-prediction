@@ -150,7 +150,7 @@ The following dataframe is the result of this function used on the 8 biggest cit
 
 ```{r}
 # result from get_immodata2(...) %>% predict_price() %>% summary()
-all_cities <- readRDS(file = "all_cities.rds") 
+all_cities <- readRDS(file = "all_cities.rds")
 ```
 
 # Shiny App
