@@ -60,7 +60,7 @@ server <- function(input, output) {
         radius = 70,
         lng = filteredData()$longitude,
         lat = filteredData()$latitude,
-        color = ifelse(all_cities$price <= all_cities$predicted_price, "green", "red"),
+        fillColor = ifelse(filteredData()$price <= filteredData()$predicted_price, "green", "red"),
         stroke = FALSE,
         fillOpacity = 1,
         popup = paste(
