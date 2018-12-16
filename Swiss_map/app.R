@@ -1,5 +1,6 @@
 library(shiny)
 library(leaflet)
+library(RColorBrewer)
 
 ui <- shinyUI(fluidPage(
   leafletOutput("map"),
@@ -7,7 +8,8 @@ ui <- shinyUI(fluidPage(
   column(4,
          wellPanel(
            checkboxGroupInput("City", "City",
-                              unique(all_cities$city))
+                              sort(as.character(unique(all_cities$city))),
+                              selected = c("Geneve", "Zurich", "Winterthur"))
          )),
   column(8,
          wellPanel(
@@ -47,8 +49,10 @@ server <- function(input, output) {
                all_cities$city == input$City,]
   })
   
+  pal <- colorQuantile(c("green", "#999999", "red"), all_cities$price/all_cities$predicted_price, n = 4)
+  
   output$map <- renderLeaflet({
-      leaflet(all_cities, options = leafletOptions(minZoom = 7.4)) %>%
+      leaflet(options = leafletOptions(minZoom = 7.4)) %>%
       setMaxBounds(5.5, 48.2, 11, 45.3) %>%
       addTiles() # Add default OpenStreetMap map tiles
   })
@@ -56,13 +60,16 @@ server <- function(input, output) {
   observe({
     leafletProxy("map", data = filteredData()) %>%
       clearShapes() %>%
-      addCircles(
-        radius = 70,
+      addCircleMarkers(
+        radius = 10,
         lng = filteredData()$longitude,
         lat = filteredData()$latitude,
-        fillColor = ifelse(filteredData()$price <= filteredData()$predicted_price, "green", "red"),
-        stroke = FALSE,
+        color = "Black",
+        fillColor = pal(filteredData()$price/filteredData()$predicted_price),
+        weight = 2,
+        opacity = 1,
         fillOpacity = 1,
+        fill = TRUE,
         popup = paste(
           "<b>Price :</b>",
           filteredData()$price,
@@ -81,7 +88,10 @@ server <- function(input, output) {
           "<b>Size :</b>",
           filteredData()$m2,
           " m2"
-        )
+        ),
+        clusterOptions = markerClusterOptions(disableClusteringAtZoom = 11,
+                                              spiderfyOnMaxZoom = FALSE,
+                                              zoomToBoundsOnClick = FALSE)
       ) %>%
       fitBounds(
         min(filteredData()$longitude),
@@ -93,3 +103,4 @@ server <- function(input, output) {
 }
 
 shinyApp(ui = ui, server = server)
+
