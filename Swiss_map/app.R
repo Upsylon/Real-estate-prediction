@@ -3,7 +3,7 @@ library(leaflet)
 
 ui <- shinyUI(fluidPage(
   leafletOutput("map"),
-  p(), #drity way of making space between map and button
+  p(), #dirty way of making space between map and button
   column(4,
          wellPanel(
            checkboxGroupInput("City", "City",
@@ -53,7 +53,6 @@ server <- function(input, output) {
       addTiles() # Add default OpenStreetMap map tiles
   })
   
-pred_color <- ifelse(all_cities2$price < all_cities2$predicted_price, "blue", "red")
   
   observe({
     leafletProxy("map", data = filteredData()) %>%
@@ -62,8 +61,7 @@ pred_color <- ifelse(all_cities2$price < all_cities2$predicted_price, "blue", "r
         radius = 20,
         lng = filteredData()$longitude,
         lat = filteredData()$latitude,
-        #color = ifelse(all_cities2$price <= all_cities2$predicted_price, "green", "red"),
-        color = pred_color,
+        color = ifelse(all_cities2$price <= all_cities2$predicted_price, "green", "red"),
         stroke = TRUE,
         fillColor = "transparent",
         popup = paste(
