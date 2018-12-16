@@ -57,7 +57,7 @@ pred_color <- ifelse(all_cities2$price < all_cities2$predicted_price, "blue", "r
   
   observe({
     leafletProxy("map", data = filteredData()) %>%
-      #clearShapes() %>%
+      clearShapes() %>%
       addCircles(
         radius = 20,
         lng = filteredData()$longitude,
