@@ -40,8 +40,8 @@ library(swissimmo)
 
 ## Legal check
 
-Before beginning anything, we have to be sure that we are respecting the utilization conditions of Immoscout24.  
-Therefore, we look if the path to which we will webscrapp the data is allowed by the website.
+Before beginning anything, we have to make sure that we are respecting the utilization conditions of Immoscout24.  
+Therefore, we look if the path to which we will web scrap the data is allowed by the website.
 
 ```{r}
 paths_allowed(paths = "/en/real-estate/rent/city/",
@@ -52,9 +52,9 @@ paths_allowed(paths = "/en/real-estate/rent/city/",
 
 We see that the path is allowed and not restricted in the robots.txt of the website. We can begin our analysis.
 
-## Webscrapping 
+## Web scrapping 
 
-The first step of our process is to webscrapp the data from Immoscout24.  
+The first step of our process is to web scrap the data from Immoscout24.  
 
 In order to perform our analysis, we first would like to have all relevant informations concerning the housings for different cities of interest.  
 
@@ -62,7 +62,7 @@ Thus, for given cities, we would like to retrieve all housings that are currentl
 
 Thanks to the function *get_immodata* from the *swissimmo* package that we created and that is available publicly on github, we can retrieve all these informations. 
 
-This function takes as an argument a vector containing the names of the cities for which the user would like to webscrap the data and returns a tidy dataframe with all relevant informations.  
+This function takes as an argument a vector containing the names of the cities for which the user would like to web scrap the data and returns a tidy dataframe with all relevant informations.  
 More information are available using the help of the function.
 
 As an example, we propose you to run the following to have the data related to Bussigny and Nyon.
@@ -143,17 +143,14 @@ The tool that we decide to use is using *GoogleMaps* and retrieves these coordin
 However, this feature requires an API key provided by *Google* is not free of charged passed a certain limit. Moreover, this feature requires quite some time to be ran.  
 
 For more convenience, we provide you a dataframe which is the result of the function *get_immodata2* that can be used after having received the adequate key (if you have interest in running this function, use the function *set_key()* with the provided key. 
-This function is an amelioration of our first *get_immodata* function and directly provides all the information webscrapped, the longitude, the latitude and the predicted price.  
+This function is an amelioration of our first *get_immodata* function and directly provides all the information web scrapped, the longitude, the latitude and the predicted price.  
 
 The following dataframe is the result of this function used on the 8 biggest cities of Switzerland. 
 
 
 ```{r}
-# result from get_immodata2(...) 
-all_cities <- readRDS(file = "all_cities.rds") 
-
 # result from get_immodata2(...) %>% predict_price() %>% summary()
-all_cities2 <- readRDS(file = "all_cities2.rds") 
+all_cities <- readRDS(file = "all_cities.rds") 
 ```
 
 # Shiny App
