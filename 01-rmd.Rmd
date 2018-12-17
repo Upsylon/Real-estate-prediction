@@ -6,6 +6,7 @@ output:
   html_document:
     theme: cerulean
     highlight: tango
+runtime: shiny
 ---
 
 ```{r message = FALSE, warning = FALSE, echo = FALSE}
@@ -165,7 +166,7 @@ The final step of our analysis is to have an interactive map of these data enabl
 The *swissmap* function allows us to call the shiny app using as an argument a dataframe which might result from our previous analysis.  
 As an example, we use the *all.cities* object that we presented before. 
 
-```{r, fig.height = 12, fig.width = 12}
+```{r, fig.height = 18, fig.width = 12}
 swissmap(all_cities)
 ```
 

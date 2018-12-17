@@ -2,16 +2,17 @@
 title: "Swiss Real Estate Map <br/> PTDS Project"
 author: "Luca Bron, David Germano, Patrik Grandadam, Vincent Lomazzi, Edgar Raisin"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
-output:
-  ioslides_presentation: default
-
+output: ioslides_presentation
+runtime: shiny
 ---
+
 ```{r, include = FALSE}
 library(swissimmo)
 library(png)
 library(grid)
 library(googleway)
 library(dplyr)
+library(kableExtra)
 set_key("AIzaSyBQd93y1YsbrWKxMgnaRXoX0Wg6F-fiCqc")
 ```
 
@@ -38,14 +39,23 @@ grid.raster(img)
 
 ## <b>get_immodata2()</b>
 Web scrap Immoscout24 data by city and adding coordinates and predicted price
-```{r}
+```{r, error = FALSE, message = FALSE, comment = NA, warning = FALSE, results = 'hide'}
 cities <- get_immodata2("crissier") 
-head(cities)
 ```
+
+```{r, echo = FALSE}
+head(cities, n = 4L) %>% kable()
+```
+
 
 ## <b>predict_price()</b>
 Create a new "pred" object with the predicted price
-```{r}
+```{r, eval = FALSE}
+# Predictions based on the cities dataframe
+cities_pred <- predict_price(cities)
+```
+
+```{r, echo = FALSE}
 # Predictions based on the cities dataframe
 cities_pred <- predict_price(cities)
 ```
@@ -58,9 +68,18 @@ predict_price(rooms = 3, m2 = 59, city = "nyon")
 ## <b>summary.pred</b>
 Extract the price of "pred" object
 
+```{r, eval = FALSE}
+summary(cities_pred)
+```
+
+```{r, echo = FALSE}
+summary(cities_pred) %>% head(n = 4L) %>% kable
+```
+
+
 ## <b>plot.pred()</b>
 Plot the predictions against the real values of "pred" object
-```{r}
+```{r, error = FALSE, message = FALSE, comment = NA, warning = FALSE, results = 'hide'}
 plot(cities_pred)
 ```
 
@@ -68,10 +87,12 @@ plot(cities_pred)
 # 3. Shiny App
 ## Demonstration
 
-```{r}
-# 8 biggest cities obtained with the presented methods
+```{r, echo = FALSE}
 all_cities <- readRDS(file = "all_cities.rds") 
+```
 
-swissmap(all_cities)
+
+```{r}
+swissmap(all_cities) # 8 biggest cities obtained with the presented methods
 ```
 
