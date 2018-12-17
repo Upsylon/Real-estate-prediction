@@ -235,7 +235,7 @@ $(document).ready(function () {
 
 <h1 class="title toc-ignore">Project PTDS</h1>
 <h4 class="author"><em>Luca Bron, David Germano, Patrik Grandadam, Vincent Lomazzi, Edgar Raisin</em></h4>
-<h4 class="date"><em>11 December, 2018</em></h4>
+<h4 class="date"><em>17 December, 2018</em></h4>
 
 </div>
 
@@ -244,7 +244,10 @@ $(document).ready(function () {
 <h1>Introduction</h1>
 <div id="objectives" class="section level2">
 <h2>Objectives</h2>
-<p>… what we want to achieve…</p>
+<p>The objectives of our project is to create an interactive map of the Swiss real estate market. The map is represented as a Shiny App. To get all the informations, we have created our “swissimmo” package. The package is composed of different functions that helps users to get all the relevant data. The data available on the App has been web scraped on Immoscout24.<br />
+Through the map, the user can select very precisely by setting the characterictics that he wants.<br />
+Moreover, we thought that it was nice to add a predictive model in order to predict the price of each property in order to compare it with the effective price.<br />
+… what we want to achieve…</p>
 </div>
 <div id="methodology" class="section level2">
 <h2>Methodology</h2>
@@ -255,8 +258,8 @@ $(document).ready(function () {
 <h1>Modelling</h1>
 <div id="legal-check" class="section level2">
 <h2>Legal check</h2>
-<p>Before beginning anything, we have to be sure that we are respecting the utilization conditions of Immoscout24.<br />
-Therefore, we look if the path to which we will webscrapp the data is allowed by the website.</p>
+<p>Before beginning anything, we have to make sure that we are respecting the utilization conditions of Immoscout24.<br />
+Therefore, we look if the path to which we will web scrap the data is allowed by the website.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">paths_allowed</span>(<span class="dt">paths =</span> <span class="st">&quot;/en/real-estate/rent/city/&quot;</span>,
               <span class="dt">domain =</span> <span class="st">&quot;https://www.immoscout24.ch&quot;</span>)</code></pre></div>
 <pre><code>## 
@@ -265,25 +268,25 @@ Therefore, we look if the path to which we will webscrapp the data is allowed by
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># get_robotstxt(domain = &quot;https://www.immoscout24.ch&quot;)</span></code></pre></div>
 <p>We see that the path is allowed and not restricted in the robots.txt of the website. We can begin our analysis.</p>
 </div>
-<div id="webscrapping" class="section level2">
-<h2>Webscrapping</h2>
-<p>The first step of our process is to webscrapp the data from Immoscout24.</p>
+<div id="web-scrapping" class="section level2">
+<h2>Web scrapping</h2>
+<p>The first step of our process is to web scrap the data from Immoscout24.</p>
 <p>In order to perform our analysis, we first would like to have all relevant informations concerning the housings for different cities of interest.</p>
 <p>Thus, for given cities, we would like to retrieve all housings that are currently published for renting and their respective number of rooms, square meters, price and address.</p>
 <p>Thanks to the function <em>get_immodata</em> from the <em>swissimmo</em> package that we created and that is available publicly on github, we can retrieve all these informations.</p>
-<p>This function takes as an argument a vector containing the names of the cities for which the user would like to webscrap the data and returns a tidy dataframe with all relevant informations.<br />
+<p>This function takes as an argument a vector containing the names of the cities for which the user would like to web scrap the data and returns a tidy dataframe with all relevant informations.<br />
 More information are available using the help of the function.</p>
 <p>As an example, we propose you to run the following to have the data related to Bussigny and Nyon.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">cities &lt;-<span class="st"> </span><span class="kw">get_immodata</span>(<span class="kw">c</span>(<span class="st">&quot;bussigny&quot;</span>, <span class="st">&quot;nyon&quot;</span>))</code></pre></div>
 <p>The data is collected in a dataframe. Each row is an observation and the columns contain the relevant informations. Below the first rows of the created dataframe.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(cities)</code></pre></div>
-<pre><code>##   rooms m2 price                              address     city
-## 2   1.0 23  1067 Chemin des Jonchets 10 1030 Bussigny Bussigny
-## 3   1.0 23  1290     Rue de Lausanne 52 1030 Bussigny Bussigny
-## 4   1.5 46  1320        Rte de Lausanne 1030 Bussigny Bussigny
-## 6   1.5 49  1393  Chemin des Jonchets 1 1030 Bussigny Bussigny
-## 7   2.0 36  1465   Rue de l'Industrie 7 1030 Bussigny Bussigny
-## 8   1.0 25  1563                        1030 Bussigny Bussigny</code></pre>
+<pre><code>##   rooms m2 price                             address     city
+## 1   1.0 23  1290    Rue de Lausanne 52 1030 Bussigny Bussigny
+## 3   1.5 41  1080  Chemin de Cocagne 49 1030 Bussigny Bussigny
+## 4   1.5 41  1090  Chemin de Cocagne 49 1030 Bussigny Bussigny
+## 5   1.5 46  1320       Rte de Lausanne 1030 Bussigny Bussigny
+## 7   1.5 49  1393 Chemin des Jonchets 1 1030 Bussigny Bussigny
+## 8   2.0 36  1465  Rue de l'Industrie 7 1030 Bussigny Bussigny</code></pre>
 <p>Having a clean dataframe is great. A lot of descriptive analysis could already be performed.<br />
 However, it could be interesting to have a model predicting the price of the housings and to compare them to their actual renting price. This could enable to see if a flat is overpriced or underprice.</p>
 </div>
@@ -298,7 +301,7 @@ Note that, as the main goal of this report is not to present forecasting methods
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">predict_price</span>(<span class="dt">rooms =</span> <span class="dv">3</span>, <span class="dt">m2 =</span> <span class="dv">59</span>, <span class="dt">city =</span> <span class="st">&quot;nyon&quot;</span>)</code></pre></div>
 <pre><code>## The output is the estimated price for an unique housing</code></pre>
 <pre><code>## note: only 1 unique complexity parameters in default grid. Truncating the grid to 1 .</code></pre>
-<pre><code>## [1] &quot;The predicted price for this housing is 1702 CHF.&quot;</code></pre>
+<pre><code>## [1] &quot;The predicted price for this housing is 1724 CHF.&quot;</code></pre>
 <p>The estimated price and a message telling us that this price has been computed for a single housing and not for a dataframe are prompted.<br />
 Otherwise, if we analyse a whole city and not a single housing, it is possible to directly use as an input a dataframe.</p>
 <p>As an example, we can use this function using as an input the object <em>cities</em> that we created before.</p>
@@ -344,26 +347,6 @@ predicted_price
 23
 </td>
 <td style="text-align:right;">
-1067
-</td>
-<td style="text-align:left;">
-Chemin des Jonchets 10 1030 Bussigny
-</td>
-<td style="text-align:left;">
-Bussigny
-</td>
-<td style="text-align:right;">
-1270
-</td>
-</tr>
-<tr>
-<td style="text-align:right;">
-1.0
-</td>
-<td style="text-align:right;">
-23
-</td>
-<td style="text-align:right;">
 1290
 </td>
 <td style="text-align:left;">
@@ -373,7 +356,47 @@ Rue de Lausanne 52 1030 Bussigny
 Bussigny
 </td>
 <td style="text-align:right;">
-1270
+1404
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+1.5
+</td>
+<td style="text-align:right;">
+41
+</td>
+<td style="text-align:right;">
+1080
+</td>
+<td style="text-align:left;">
+Chemin de Cocagne 49 1030 Bussigny
+</td>
+<td style="text-align:left;">
+Bussigny
+</td>
+<td style="text-align:right;">
+1193
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+1.5
+</td>
+<td style="text-align:right;">
+41
+</td>
+<td style="text-align:right;">
+1090
+</td>
+<td style="text-align:left;">
+Chemin de Cocagne 49 1030 Bussigny
+</td>
+<td style="text-align:left;">
+Bussigny
+</td>
+<td style="text-align:right;">
+1193
 </td>
 </tr>
 <tr>
@@ -393,7 +416,7 @@ Rte de Lausanne 1030 Bussigny
 Bussigny
 </td>
 <td style="text-align:right;">
-1328
+1311
 </td>
 </tr>
 <tr>
@@ -413,7 +436,7 @@ Chemin des Jonchets 1 1030 Bussigny
 Bussigny
 </td>
 <td style="text-align:right;">
-1354
+1330
 </td>
 </tr>
 <tr>
@@ -433,7 +456,27 @@ Rue de l’Industrie 7 1030 Bussigny
 Bussigny
 </td>
 <td style="text-align:right;">
-1381
+1405
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2.5
+</td>
+<td style="text-align:right;">
+51
+</td>
+<td style="text-align:right;">
+1490
+</td>
+<td style="text-align:left;">
+23 Rue de l’Industrie 1030 Bussigny
+</td>
+<td style="text-align:left;">
+Bussigny
+</td>
+<td style="text-align:right;">
+1479
 </td>
 </tr>
 <tr>
@@ -453,7 +496,7 @@ Bussigny
 Bussigny
 </td>
 <td style="text-align:right;">
-1325
+1385
 </td>
 </tr>
 <tr>
@@ -473,7 +516,7 @@ Bussigny
 Bussigny
 </td>
 <td style="text-align:right;">
-1388
+1459
 </td>
 </tr>
 <tr>
@@ -493,7 +536,7 @@ Rue de la Gare 1030 Bussigny
 Bussigny
 </td>
 <td style="text-align:right;">
-1928
+1858
 </td>
 </tr>
 <tr>
@@ -513,7 +556,7 @@ Rue de l’Industrie 7 1030 Bussigny
 Bussigny
 </td>
 <td style="text-align:right;">
-1699
+1617
 </td>
 </tr>
 <tr>
@@ -533,7 +576,7 @@ Rte d’Eguechaudens 9 1030 Bussigny
 Bussigny
 </td>
 <td style="text-align:right;">
-2161
+2142
 </td>
 </tr>
 <tr>
@@ -553,7 +596,7 @@ Chemin des Jonchets 10 1030 Bussigny
 Bussigny
 </td>
 <td style="text-align:right;">
-1832
+2001
 </td>
 </tr>
 <tr>
@@ -573,7 +616,7 @@ Chemin des Jonchets 10 1030 Bussigny
 Bussigny
 </td>
 <td style="text-align:right;">
-2029
+2006
 </td>
 </tr>
 <tr>
@@ -593,7 +636,7 @@ Chemin des Jonchets 2 1030 Bussigny
 Bussigny
 </td>
 <td style="text-align:right;">
-2122
+2101
 </td>
 </tr>
 <tr>
@@ -613,7 +656,7 @@ Chemin de Roseaz 22 1030 Bussigny
 Bussigny
 </td>
 <td style="text-align:right;">
-2311
+2191
 </td>
 </tr>
 <tr>
@@ -633,7 +676,27 @@ Chemin des Jonchets 2 1030 Bussigny
 Bussigny
 </td>
 <td style="text-align:right;">
-2212
+2068
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+4.5
+</td>
+<td style="text-align:right;">
+100
+</td>
+<td style="text-align:right;">
+2495
+</td>
+<td style="text-align:left;">
+Chemin des Jonchets 14 1030 Bussigny
+</td>
+<td style="text-align:left;">
+Bussigny
+</td>
+<td style="text-align:right;">
+2830
 </td>
 </tr>
 <tr>
@@ -653,27 +716,7 @@ Chemin des Jonchets 1 1030 Bussigny
 Bussigny
 </td>
 <td style="text-align:right;">
-2616
-</td>
-</tr>
-<tr>
-<td style="text-align:right;">
-4.5
-</td>
-<td style="text-align:right;">
-101
-</td>
-<td style="text-align:right;">
-2636
-</td>
-<td style="text-align:left;">
-Chemin des Jonchets 2 1030 Bussigny
-</td>
-<td style="text-align:left;">
-Bussigny
-</td>
-<td style="text-align:right;">
-2648
+2688
 </td>
 </tr>
 <tr>
@@ -693,7 +736,7 @@ Chemin des Jonchets 2 1030 Bussigny
 Bussigny
 </td>
 <td style="text-align:right;">
-2648
+2718
 </td>
 </tr>
 <tr>
@@ -713,7 +756,7 @@ Bussigny
 Bussigny
 </td>
 <td style="text-align:right;">
-2725
+2724
 </td>
 </tr>
 <tr>
@@ -753,7 +796,7 @@ Chemin des Jonchets 5 1030 Bussigny
 Bussigny
 </td>
 <td style="text-align:right;">
-2689
+2699
 </td>
 </tr>
 <tr>
@@ -773,7 +816,7 @@ Chemin des Jonchets 1 1030 Bussigny
 Bussigny
 </td>
 <td style="text-align:right;">
-2716
+2715
 </td>
 </tr>
 <tr>
@@ -781,19 +824,399 @@ Bussigny
 4.5
 </td>
 <td style="text-align:right;">
-128
+102
 </td>
 <td style="text-align:right;">
-3100
+2760
 </td>
 <td style="text-align:left;">
-Chemin du Midi 1 - 33 1260 Nyon
+Chemin des Jonchets 7 1030 Bussigny
 </td>
 <td style="text-align:left;">
-Nyon
+Bussigny
 </td>
 <td style="text-align:right;">
-3136
+2737
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+4.0
+</td>
+<td style="text-align:right;">
+117
+</td>
+<td style="text-align:right;">
+2976
+</td>
+<td style="text-align:left;">
+Chemin des Jonchets 3 1030 Bussigny
+</td>
+<td style="text-align:left;">
+Bussigny
+</td>
+<td style="text-align:right;">
+2869
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+8.5
+</td>
+<td style="text-align:right;">
+320
+</td>
+<td style="text-align:right;">
+6100
+</td>
+<td style="text-align:left;">
+Rue Montolieu 2 1030 Bussigny
+</td>
+<td style="text-align:left;">
+Bussigny
+</td>
+<td style="text-align:right;">
+6387
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+3.5
+</td>
+<td style="text-align:right;">
+68
+</td>
+<td style="text-align:right;">
+1530
+</td>
+<td style="text-align:left;">
+chemin de Roseaz 8 1030 Bussigny
+</td>
+<td style="text-align:left;">
+Bussigny
+</td>
+<td style="text-align:right;">
+1840
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+3.0
+</td>
+<td style="text-align:right;">
+70
+</td>
+<td style="text-align:right;">
+1550
+</td>
+<td style="text-align:left;">
+1030 Bussigny
+</td>
+<td style="text-align:left;">
+Bussigny
+</td>
+<td style="text-align:right;">
+1729
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2.5
+</td>
+<td style="text-align:right;">
+40
+</td>
+<td style="text-align:right;">
+1600
+</td>
+<td style="text-align:left;">
+Chemin de Villars 4 1030 Bussigny
+</td>
+<td style="text-align:left;">
+Bussigny
+</td>
+<td style="text-align:right;">
+1455
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+3.5
+</td>
+<td style="text-align:right;">
+78
+</td>
+<td style="text-align:right;">
+1800
+</td>
+<td style="text-align:left;">
+1030 Bussigny
+</td>
+<td style="text-align:left;">
+Bussigny
+</td>
+<td style="text-align:right;">
+1987
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+3.5
+</td>
+<td style="text-align:right;">
+75
+</td>
+<td style="text-align:right;">
+1850
+</td>
+<td style="text-align:left;">
+Rue de Lausanne 21 1030 Bussigny
+</td>
+<td style="text-align:left;">
+Bussigny
+</td>
+<td style="text-align:right;">
+1983
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2.5
+</td>
+<td style="text-align:right;">
+78
+</td>
+<td style="text-align:right;">
+1950
+</td>
+<td style="text-align:left;">
+1030 Bussigny
+</td>
+<td style="text-align:left;">
+Bussigny
+</td>
+<td style="text-align:right;">
+1937
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+3.0
+</td>
+<td style="text-align:right;">
+75
+</td>
+<td style="text-align:right;">
+1980
+</td>
+<td style="text-align:left;">
+1030 Bussigny
+</td>
+<td style="text-align:left;">
+Bussigny
+</td>
+<td style="text-align:right;">
+1946
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+3.5
+</td>
+<td style="text-align:right;">
+60
+</td>
+<td style="text-align:right;">
+2000
+</td>
+<td style="text-align:left;">
+Rue de la Gare 21 1030 Bussigny
+</td>
+<td style="text-align:left;">
+Bussigny
+</td>
+<td style="text-align:right;">
+1947
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+3.5
+</td>
+<td style="text-align:right;">
+67
+</td>
+<td style="text-align:right;">
+2100
+</td>
+<td style="text-align:left;">
+Jonchets 14 1030 Bussigny
+</td>
+<td style="text-align:left;">
+Bussigny
+</td>
+<td style="text-align:right;">
+2034
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+3.0
+</td>
+<td style="text-align:right;">
+62
+</td>
+<td style="text-align:right;">
+2105
+</td>
+<td style="text-align:left;">
+Chemin des Jonchets 14 1030 Bussigny
+</td>
+<td style="text-align:left;">
+Bussigny
+</td>
+<td style="text-align:right;">
+2001
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+3.5
+</td>
+<td style="text-align:right;">
+80
+</td>
+<td style="text-align:right;">
+2150
+</td>
+<td style="text-align:left;">
+Saint-Germain 33C 1030 Bussigny
+</td>
+<td style="text-align:left;">
+Bussigny
+</td>
+<td style="text-align:right;">
+2189
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+4.5
+</td>
+<td style="text-align:right;">
+80
+</td>
+<td style="text-align:right;">
+2202
+</td>
+<td style="text-align:left;">
+Chemin de Roseaz 22 1030 Bussigny
+</td>
+<td style="text-align:left;">
+Bussigny
+</td>
+<td style="text-align:right;">
+2191
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+3.5
+</td>
+<td style="text-align:right;">
+80
+</td>
+<td style="text-align:right;">
+2250
+</td>
+<td style="text-align:left;">
+1030 Bussigny
+</td>
+<td style="text-align:left;">
+Bussigny
+</td>
+<td style="text-align:right;">
+2189
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+4.5
+</td>
+<td style="text-align:right;">
+110
+</td>
+<td style="text-align:right;">
+2490
+</td>
+<td style="text-align:left;">
+Ch. De Gravernay 14 1030 Bussigny
+</td>
+<td style="text-align:left;">
+Bussigny
+</td>
+<td style="text-align:right;">
+2653
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+4.5
+</td>
+<td style="text-align:right;">
+100
+</td>
+<td style="text-align:right;">
+2495
+</td>
+<td style="text-align:left;">
+Chemin des jonchets 1030 Bussigny
+</td>
+<td style="text-align:left;">
+Bussigny
+</td>
+<td style="text-align:right;">
+2830
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+4.5
+</td>
+<td style="text-align:right;">
+120
+</td>
+<td style="text-align:right;">
+3150
+</td>
+<td style="text-align:left;">
+Chemin de rente 14 1030 Bussigny
+</td>
+<td style="text-align:left;">
+Bussigny
+</td>
+<td style="text-align:right;">
+3165
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+4.5
+</td>
+<td style="text-align:right;">
+100
+</td>
+<td style="text-align:right;">
+3500
+</td>
+<td style="text-align:left;">
+1030 Bussigny
+</td>
+<td style="text-align:left;">
+Bussigny
+</td>
+<td style="text-align:right;">
+2830
 </td>
 </tr>
 <tr>
@@ -813,7 +1236,7 @@ Rue de Rive 68 1260 Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-2706
+2867
 </td>
 </tr>
 <tr>
@@ -833,7 +1256,7 @@ Route du Boiron 27 1260 Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-2924
+2998
 </td>
 </tr>
 <tr>
@@ -853,7 +1276,7 @@ Route de l’ Etraz 54 1260 Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-1047
+1102
 </td>
 </tr>
 <tr>
@@ -873,7 +1296,27 @@ Quartier de la Levratte 30 1260 Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-1173
+1264
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2.5
+</td>
+<td style="text-align:right;">
+60
+</td>
+<td style="text-align:right;">
+1650
+</td>
+<td style="text-align:left;">
+Chemin de Precossy 27 1260 Nyon
+</td>
+<td style="text-align:left;">
+Nyon
+</td>
+<td style="text-align:right;">
+1699
 </td>
 </tr>
 <tr>
@@ -881,19 +1324,19 @@ Nyon
 2.0
 </td>
 <td style="text-align:right;">
-55
+60
 </td>
 <td style="text-align:right;">
-1587
+1670
 </td>
 <td style="text-align:left;">
-Les Fontaines G (Eysins 53 B) 1260 Nyon
+Rue des Marchandises 14 1260 Nyon
 </td>
 <td style="text-align:left;">
 Nyon
 </td>
 <td style="text-align:right;">
-1421
+1690
 </td>
 </tr>
 <tr>
@@ -913,7 +1356,7 @@ Rte de St-Cergue 29 1260 Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-1686
+1680
 </td>
 </tr>
 <tr>
@@ -933,7 +1376,7 @@ Rte de St-Cergue 29 1260 Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-1686
+1680
 </td>
 </tr>
 <tr>
@@ -953,27 +1396,7 @@ Chemin d’Eysins 41 1260 Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-2075
-</td>
-</tr>
-<tr>
-<td style="text-align:right;">
-2.5
-</td>
-<td style="text-align:right;">
-45
-</td>
-<td style="text-align:right;">
-1850
-</td>
-<td style="text-align:left;">
-Chemin Des Tates d’Oie 38 1260 Nyon
-</td>
-<td style="text-align:left;">
-Nyon
-</td>
-<td style="text-align:right;">
-1509
+1969
 </td>
 </tr>
 <tr>
@@ -993,7 +1416,7 @@ Quartier de la Levratte 12 1260 Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-2514
+2453
 </td>
 </tr>
 <tr>
@@ -1013,7 +1436,7 @@ Route du Boiron 1260 Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-2645
+2705
 </td>
 </tr>
 <tr>
@@ -1033,7 +1456,7 @@ Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-2603
+2588
 </td>
 </tr>
 <tr>
@@ -1053,7 +1476,7 @@ Quartier de la Levratte 30 1260 Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-2546
+2561
 </td>
 </tr>
 <tr>
@@ -1073,27 +1496,7 @@ Route des Tattes d’Oie 36 1260 Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-2859
-</td>
-</tr>
-<tr>
-<td style="text-align:right;">
-4.5
-</td>
-<td style="text-align:right;">
-108
-</td>
-<td style="text-align:right;">
-2700
-</td>
-<td style="text-align:left;">
-Route des Tattes d’Oie 36 1260 Nyon
-</td>
-<td style="text-align:left;">
-Nyon
-</td>
-<td style="text-align:right;">
-2697
+2863
 </td>
 </tr>
 <tr>
@@ -1113,7 +1516,7 @@ Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-2732
+2555
 </td>
 </tr>
 <tr>
@@ -1133,7 +1536,7 @@ Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-2753
+2508
 </td>
 </tr>
 <tr>
@@ -1153,7 +1556,27 @@ Chemin de Bonmont 5 1260 Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-2755
+2865
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+4.5
+</td>
+<td style="text-align:right;">
+114
+</td>
+<td style="text-align:right;">
+2840
+</td>
+<td style="text-align:left;">
+24 Chemin de Chantemerle 1260 Nyon
+</td>
+<td style="text-align:left;">
+Nyon
+</td>
+<td style="text-align:right;">
+2863
 </td>
 </tr>
 <tr>
@@ -1173,7 +1596,7 @@ Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-2893
+3069
 </td>
 </tr>
 <tr>
@@ -1193,7 +1616,7 @@ Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-3114
+3542
 </td>
 </tr>
 <tr>
@@ -1213,7 +1636,7 @@ Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-2859
+2863
 </td>
 </tr>
 <tr>
@@ -1233,7 +1656,7 @@ CH.DES SAULES 3 1260 Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-3090
+3264
 </td>
 </tr>
 <tr>
@@ -1241,7 +1664,7 @@ Nyon
 3.5
 </td>
 <td style="text-align:right;">
-80
+98
 </td>
 <td style="text-align:right;">
 3040
@@ -1253,7 +1676,27 @@ Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-2753
+2926
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+4.5
+</td>
+<td style="text-align:right;">
+128
+</td>
+<td style="text-align:right;">
+3100
+</td>
+<td style="text-align:left;">
+Chemin du Midi 1 - 33 1260 Nyon
+</td>
+<td style="text-align:left;">
+Nyon
+</td>
+<td style="text-align:right;">
+3295
 </td>
 </tr>
 <tr>
@@ -1273,27 +1716,7 @@ Chemin de Prelaz 32 1260 Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-3185
-</td>
-</tr>
-<tr>
-<td style="text-align:right;">
-4.0
-</td>
-<td style="text-align:right;">
-93
-</td>
-<td style="text-align:right;">
-3550
-</td>
-<td style="text-align:left;">
-Rue de la Gare 14 1260 Nyon
-</td>
-<td style="text-align:left;">
-Nyon
-</td>
-<td style="text-align:right;">
-3107
+3371
 </td>
 </tr>
 <tr>
@@ -1313,7 +1736,47 @@ Chemin des Plantaz 20 1260 Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-3202
+3388
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+4.5
+</td>
+<td style="text-align:right;">
+130
+</td>
+<td style="text-align:right;">
+3700
+</td>
+<td style="text-align:left;">
+Route de l’Industrie 1 1260 Nyon
+</td>
+<td style="text-align:left;">
+Nyon
+</td>
+<td style="text-align:right;">
+3400
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+5.5
+</td>
+<td style="text-align:right;">
+159
+</td>
+<td style="text-align:right;">
+4400
+</td>
+<td style="text-align:left;">
+1260 Nyon
+</td>
+<td style="text-align:left;">
+Nyon
+</td>
+<td style="text-align:right;">
+3889
 </td>
 </tr>
 <tr>
@@ -1333,7 +1796,7 @@ Avenue des Eules 15 1260 Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-6302
+6362
 </td>
 </tr>
 <tr>
@@ -1353,47 +1816,7 @@ Centre Ville 1260 Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-6030
-</td>
-</tr>
-<tr>
-<td style="text-align:right;">
-2.0
-</td>
-<td style="text-align:right;">
-45
-</td>
-<td style="text-align:right;">
-600
-</td>
-<td style="text-align:left;">
-Route du Stand 25 1260 Nyon
-</td>
-<td style="text-align:left;">
-Nyon
-</td>
-<td style="text-align:right;">
-1022
-</td>
-</tr>
-<tr>
-<td style="text-align:right;">
-1.0
-</td>
-<td style="text-align:right;">
-25
-</td>
-<td style="text-align:right;">
-800
-</td>
-<td style="text-align:left;">
-chemin des Fauvettes 18 1260 Nyon
-</td>
-<td style="text-align:left;">
-Nyon
-</td>
-<td style="text-align:right;">
-1025
+5985
 </td>
 </tr>
 <tr>
@@ -1413,47 +1836,27 @@ Rte de tattes d oie 93 1260 Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-2123
+1722
 </td>
 </tr>
 <tr>
 <td style="text-align:right;">
-3.5
+1.0
 </td>
 <td style="text-align:right;">
-70
+25
 </td>
 <td style="text-align:right;">
-1095
+975
 </td>
 <td style="text-align:left;">
-Chemin de la fontaine 8 1260 Nyon
+chemin des Fauvettes 18 1260 Nyon
 </td>
 <td style="text-align:left;">
 Nyon
 </td>
 <td style="text-align:right;">
-1305
-</td>
-</tr>
-<tr>
-<td style="text-align:right;">
-3.5
-</td>
-<td style="text-align:right;">
-70
-</td>
-<td style="text-align:right;">
-1095
-</td>
-<td style="text-align:left;">
-Chemin de la fontaine 8 1260 Nyon
-</td>
-<td style="text-align:left;">
-Nyon
-</td>
-<td style="text-align:right;">
-1305
+1144
 </td>
 </tr>
 <tr>
@@ -1461,7 +1864,7 @@ Nyon
 2.0
 </td>
 <td style="text-align:right;">
-39
+35
 </td>
 <td style="text-align:right;">
 1220
@@ -1473,7 +1876,27 @@ la Levratte 30 1260 Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-1181
+1264
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+1.5
+</td>
+<td style="text-align:right;">
+45
+</td>
+<td style="text-align:right;">
+1250
+</td>
+<td style="text-align:left;">
+Chemin du carroz d’amont 14 St-Cergue 1260 Nyon
+</td>
+<td style="text-align:left;">
+Nyon
+</td>
+<td style="text-align:right;">
+1288
 </td>
 </tr>
 <tr>
@@ -1493,7 +1916,7 @@ De la colombiere 8 1260 Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-1562
+1502
 </td>
 </tr>
 <tr>
@@ -1513,7 +1936,87 @@ Levratte 10 1260 Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-1182
+1220
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+3.5
+</td>
+<td style="text-align:right;">
+90
+</td>
+<td style="text-align:right;">
+1350
+</td>
+<td style="text-align:left;">
+Chemin du Cossy 5 1260 Nyon
+</td>
+<td style="text-align:left;">
+Nyon
+</td>
+<td style="text-align:right;">
+2496
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2.0
+</td>
+<td style="text-align:right;">
+43
+</td>
+<td style="text-align:right;">
+1540
+</td>
+<td style="text-align:left;">
+Route de divonne 1260 Nyon
+</td>
+<td style="text-align:left;">
+Nyon
+</td>
+<td style="text-align:right;">
+1393
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2.0
+</td>
+<td style="text-align:right;">
+60
+</td>
+<td style="text-align:right;">
+1670
+</td>
+<td style="text-align:left;">
+Rue des Marchandises 14 1260 Nyon
+</td>
+<td style="text-align:left;">
+Nyon
+</td>
+<td style="text-align:right;">
+1690
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+3.5
+</td>
+<td style="text-align:right;">
+73
+</td>
+<td style="text-align:right;">
+1770
+</td>
+<td style="text-align:left;">
+Route de l’Etraz 56 1260 Nyon
+</td>
+<td style="text-align:left;">
+Nyon
+</td>
+<td style="text-align:right;">
+2037
 </td>
 </tr>
 <tr>
@@ -1524,7 +2027,7 @@ Nyon
 65
 </td>
 <td style="text-align:right;">
-1750
+1800
 </td>
 <td style="text-align:left;">
 1260 Nyon
@@ -1533,27 +2036,7 @@ Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-1768
-</td>
-</tr>
-<tr>
-<td style="text-align:right;">
-2.5
-</td>
-<td style="text-align:right;">
-60
-</td>
-<td style="text-align:right;">
-1777
-</td>
-<td style="text-align:left;">
-1260 Nyon
-</td>
-<td style="text-align:left;">
-Nyon
-</td>
-<td style="text-align:right;">
-1707
+1925
 </td>
 </tr>
 <tr>
@@ -1561,19 +2044,39 @@ Nyon
 3.0
 </td>
 <td style="text-align:right;">
-78
+63
 </td>
 <td style="text-align:right;">
-1960
+1910
 </td>
 <td style="text-align:left;">
-Chemin d’Eysins 12 1260 Nyon
+Proche de la gare 1260 Nyon
 </td>
 <td style="text-align:left;">
 Nyon
 </td>
 <td style="text-align:right;">
-2171
+1927
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2.5
+</td>
+<td style="text-align:right;">
+67
+</td>
+<td style="text-align:right;">
+1920
+</td>
+<td style="text-align:left;">
+Route d’un Boiron 4 1260 Nyon
+</td>
+<td style="text-align:left;">
+Nyon
+</td>
+<td style="text-align:right;">
+1883
 </td>
 </tr>
 <tr>
@@ -1593,47 +2096,7 @@ Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-2325
-</td>
-</tr>
-<tr>
-<td style="text-align:right;">
-4.5
-</td>
-<td style="text-align:right;">
-90
-</td>
-<td style="text-align:right;">
-2330
-</td>
-<td style="text-align:left;">
-Chemin des Plantaz 1260 Nyon
-</td>
-<td style="text-align:left;">
-Nyon
-</td>
-<td style="text-align:right;">
-2471
-</td>
-</tr>
-<tr>
-<td style="text-align:right;">
-4.5
-</td>
-<td style="text-align:right;">
-94
-</td>
-<td style="text-align:right;">
-2435
-</td>
-<td style="text-align:left;">
-Chemin d’eysins 12 1260 Nyon
-</td>
-<td style="text-align:left;">
-Nyon
-</td>
-<td style="text-align:right;">
-2596
+2175
 </td>
 </tr>
 <tr>
@@ -1641,19 +2104,39 @@ Nyon
 3.5
 </td>
 <td style="text-align:right;">
-90
+70
 </td>
 <td style="text-align:right;">
-2470
+2382
 </td>
 <td style="text-align:left;">
-Chemin des Saules 20a 1260 Nyon
+Route du Boiron 1260 Nyon
 </td>
 <td style="text-align:left;">
 Nyon
 </td>
 <td style="text-align:right;">
-2612
+2201
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2.5
+</td>
+<td style="text-align:right;">
+94
+</td>
+<td style="text-align:right;">
+2460
+</td>
+<td style="text-align:left;">
+Grand Rue 5-7 1260 Nyon
+</td>
+<td style="text-align:left;">
+Nyon
+</td>
+<td style="text-align:right;">
+2563
 </td>
 </tr>
 <tr>
@@ -1673,7 +2156,7 @@ Chemin du Joran 2A 1260 Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-2562
+2540
 </td>
 </tr>
 <tr>
@@ -1693,7 +2176,7 @@ Chemin des plantaz 1260 Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-2562
+2540
 </td>
 </tr>
 <tr>
@@ -1713,7 +2196,7 @@ Rue de la poterne 7 1260 Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-2847
+2868
 </td>
 </tr>
 <tr>
@@ -1733,7 +2216,7 @@ Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-2924
+2998
 </td>
 </tr>
 <tr>
@@ -1753,7 +2236,27 @@ Rue de Rive 68 1260 Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-2706
+2867
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+3.0
+</td>
+<td style="text-align:right;">
+100
+</td>
+<td style="text-align:right;">
+2710
+</td>
+<td style="text-align:left;">
+Chemin des Ruettes 1 1260 Nyon
+</td>
+<td style="text-align:left;">
+Nyon
+</td>
+<td style="text-align:right;">
+2961
 </td>
 </tr>
 <tr>
@@ -1773,7 +2276,7 @@ Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-2772
+2829
 </td>
 </tr>
 <tr>
@@ -1793,7 +2296,7 @@ Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-2262
+2353
 </td>
 </tr>
 <tr>
@@ -1813,7 +2316,7 @@ Chemin des Tines 20 1260 Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-2635
+2651
 </td>
 </tr>
 <tr>
@@ -1833,7 +2336,7 @@ route de l’Etraz 68 1260 Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-2763
+2869
 </td>
 </tr>
 <tr>
@@ -1853,7 +2356,7 @@ Grand Rue 21 1260 Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-2490
+2604
 </td>
 </tr>
 <tr>
@@ -1873,7 +2376,167 @@ Chemin de chantemerle 12 1260 Nyon
 Nyon
 </td>
 <td style="text-align:right;">
-2859
+2863
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+4.5
+</td>
+<td style="text-align:right;">
+108
+</td>
+<td style="text-align:right;">
+3095
+</td>
+<td style="text-align:left;">
+Route du Boiron 1260 Nyon
+</td>
+<td style="text-align:left;">
+Nyon
+</td>
+<td style="text-align:right;">
+2914
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+4.5
+</td>
+<td style="text-align:right;">
+122
+</td>
+<td style="text-align:right;">
+3230
+</td>
+<td style="text-align:left;">
+3 Chemin du Joran 1260 Nyon
+</td>
+<td style="text-align:left;">
+Nyon
+</td>
+<td style="text-align:right;">
+3278
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+4.5
+</td>
+<td style="text-align:right;">
+110
+</td>
+<td style="text-align:right;">
+3252
+</td>
+<td style="text-align:left;">
+1260 Nyon
+</td>
+<td style="text-align:left;">
+Nyon
+</td>
+<td style="text-align:right;">
+2867
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+4.5
+</td>
+<td style="text-align:right;">
+130
+</td>
+<td style="text-align:right;">
+3300
+</td>
+<td style="text-align:left;">
+Rue du Ronzier 1260 Nyon
+</td>
+<td style="text-align:left;">
+Nyon
+</td>
+<td style="text-align:right;">
+3400
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+3.0
+</td>
+<td style="text-align:right;">
+100
+</td>
+<td style="text-align:right;">
+3300
+</td>
+<td style="text-align:left;">
+Route du Boiron 27 1260 Nyon
+</td>
+<td style="text-align:left;">
+Nyon
+</td>
+<td style="text-align:right;">
+2961
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+3.5
+</td>
+<td style="text-align:right;">
+90
+</td>
+<td style="text-align:right;">
+3350
+</td>
+<td style="text-align:left;">
+Avenue Alfred-Cortot 9C 1260 Nyon
+</td>
+<td style="text-align:left;">
+Nyon
+</td>
+<td style="text-align:right;">
+2496
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+3.5
+</td>
+<td style="text-align:right;">
+102
+</td>
+<td style="text-align:right;">
+3375
+</td>
+<td style="text-align:left;">
+Route de St. Cergue 36C 1260 Nyon
+</td>
+<td style="text-align:left;">
+Nyon
+</td>
+<td style="text-align:right;">
+3069
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+5.0
+</td>
+<td style="text-align:right;">
+125
+</td>
+<td style="text-align:right;">
+3500
+</td>
+<td style="text-align:left;">
+20 chemin des Plantaz 1260 Nyon
+</td>
+<td style="text-align:left;">
+Nyon
+</td>
+<td style="text-align:right;">
+3413
 </td>
 </tr>
 </tbody>
@@ -1884,18 +2547,29 @@ Nyon
 <p>To do this, we can again use our <em>predictions</em> object that we created before, and plot it with the <em>plot</em> function (<em>?plot.pred</em> to see the help).<br />
 In this graph, the values below the lines are the one with estimated values higher than the actual values. These housing are underestimated.<br />
 In order to be able to retrieve these points of interest, the function incorporates a ShinyApp..<br />
-It is possible to click on the different points or to brush many at the same time to retrieve their informations.<br />
-This function has to be runned directly in the console to work efficiently as it uses a ShinyApp.</p>
+It is possible to click on the different points or to brush many at the same time to retrieve their informations. The pop-up window gives main informations about the good (price, estimed price, adress, etc). This function has to be runned directly in the console to work efficiently as it uses a ShinyApp.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(predictions) <span class="co"># to be ran in the console</span></code></pre></div>
 <p>The next step of our process will be to use the different data that we recorded till here and to plot each housing with their different characteristics on an interactive map of Switzerland. To do this, we would need the geographical coordinates (longitude and latitude) of each housing.</p>
 <p>The tool that we decide to use is using <em>GoogleMaps</em> and retrieves these coordinates based on the address that are inputted. However, this feature requires an API key provided by <em>Google</em> is not free of charged passed a certain limit. Moreover, this feature requires quite some time to be ran.</p>
-<p>For more convenience, we provide you a dataframe which is the result of the function <em>get_immodata2</em> that can be used after having received the adequate key (if you have interest in running this function, use the function <em>set_key()</em> with the provided key. This function is an amelioration of our first <em>get_immodata</em> function and directly provides all the information webscrapped, the longitude, the latitude and the predicted price.</p>
+<p>For more convenience, we provide you a dataframe which is the result of the function <em>get_immodata2</em> that can be used after having received the adequate key (if you have interest in running this function, use the function <em>set_key()</em> with the provided key. This function is an amelioration of our first <em>get_immodata</em> function and directly provides all the information web scrapped, the longitude, the latitude and the predicted price.</p>
 <p>The following dataframe is the result of this function used on the 8 biggest cities of Switzerland.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">all_cities &lt;-<span class="st"> </span><span class="kw">readRDS</span>(<span class="dt">file =</span> <span class="st">&quot;all_cities.rds&quot;</span>)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># result from get_immodata2(...) %&gt;% predict_price() %&gt;% summary()</span>
+all_cities &lt;-<span class="st"> </span><span class="kw">readRDS</span>(<span class="dt">file =</span> <span class="st">&quot;all_cities.rds&quot;</span>)</code></pre></div>
 </div>
 </div>
 <div id="shiny-app" class="section level1">
 <h1>Shiny App</h1>
+<p>The final step of our analysis is to have an interactive map of these data enabling us to apply multiple filter, to zoom to points of interest, and to represent the different housings and their characteristics.<br />
+The <em>swissmap</em> function allows us to call the shiny app using as an argument a dataframe which might result from our previous analysis.<br />
+As an example, we use the <em>all.cities</em> object that we presented before.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">swissmap</span>(all_cities)</code></pre></div>
+<pre><code>## PhantomJS not found. You can install it with webshot::install_phantomjs(). If it is installed, please make sure the phantomjs executable can be found via the PATH variable.</code></pre>
+<div style="width: 100% ; height: 400px ; text-align: center; box-sizing: border-box; -moz-box-sizing: border-box; -webkit-box-sizing: border-box;" class="muted well">Shiny applications not supported in static R Markdown documents</div>
+</div>
+<div id="conclusion" class="section level1">
+<h1>Conclusion</h1>
+<p>Following our analysis, one can have a broader view of the real estate market in Switzerland. Using the available functions it is possible for the user to get the housings available for any city in Switzerland.<br />
+We also provide tools to forecast the market price of a housing based on its characteristics to estimated if it is rented at a good price. Finally, it is possible to plot all observations on an interactive map to be able to find the place of your dreams!</p>
 </div>
 <div id="annexes" class="section level1">
 <h1>Annexes</h1>
