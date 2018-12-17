@@ -7,7 +7,8 @@ ui <- shinyUI(fluidPage(
   column(4,
          wellPanel(
            checkboxGroupInput("City", "City",
-                              unique(all_cities$city))
+                              sort(as.character(unique(all_cities$city))),
+                              selected = c("Geneve", "Zurich", "Winterthur", "Lausanne"))
          )),
   column(8,
          wellPanel(
@@ -44,8 +45,10 @@ server <- function(input, output) {
     all_cities[all_cities$price >= input$rangePrice[1] & all_cities$price <= input$rangePrice[2] &
                all_cities$rooms >= input$rangeRooms[1] & all_cities$rooms <= input$rangeRooms[2] &
                all_cities$m2 >= input$rangeM2[1] & all_cities$m2 <= input$rangeM2[2] &
-               all_cities$city == input$City,]
+               all_cities$city %in% input$City,]
   })
+  
+  pal <- colorQuantile(c("green", "#cccccc", "red"), all_cities$price/all_cities$predicted_price, n = 4)
   
   output$map <- renderLeaflet({
       leaflet(options = leafletOptions(minZoom = 7.4)) %>%
@@ -56,14 +59,18 @@ server <- function(input, output) {
   
   observe({
     leafletProxy("map", data = filteredData()) %>%
-      clearShapes() %>%
-      addCircles(
-        radius = 40,
+      clearMarkers() %>%
+      clearMarkerClusters() %>%
+      addCircleMarkers(
+        radius = 10,
         lng = filteredData()$longitude,
         lat = filteredData()$latitude,
-        fillColor = ifelse(filteredData()$price <= filteredData()$predicted_price, "green", "red"),
-        stroke = FALSE,
+        color = "Black",
+        fillColor = pal(filteredData()$price/filteredData()$predicted_price),
+        weight = 2,
+        opacity = 1,
         fillOpacity = 1,
+        fill = TRUE,
         popup = paste(
           "<b>Price :</b>",
           filteredData()$price,
@@ -82,14 +89,16 @@ server <- function(input, output) {
           "<b>Size :</b>",
           filteredData()$m2,
           " m2"
-        )
-      ) %>%
-      fitBounds(
-        min(filteredData()$longitude),
-        min(filteredData()$latitude),
-        max(filteredData()$longitude),
-        max(filteredData()$latitude)
-      )
+        ),
+        clusterOptions = markerClusterOptions(disableClusteringAtZoom = 11,
+                                              spiderfyOnMaxZoom = FALSE)
+      ) #%>%
+      # fitBounds(
+      #   min(filteredData()$longitude),
+      #   min(filteredData()$latitude),
+      #   max(filteredData()$longitude),
+      #   max(filteredData()$latitude)
+      # )
   })
 }
 

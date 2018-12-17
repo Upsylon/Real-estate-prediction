@@ -6,6 +6,52 @@ output:
   ioslides_presentation: default
 
 ---
+```{r, include = FALSE}
+library(swissimmo)
+library(googleway)
+set_key("AIzaSyBQd93y1YsbrWKxMgnaRXoX0Wg6F-fiCqc")
+```
 
-#Presentation
+
+# 1. Our project
+## 1.1 Objectives
+
+* Create an interactive map of the Swiss real estate market
+* Create a R package allowing users to web scrap updated real estate data on Immoscout24
+
+## 1.2 Methodology
+
+* Data web scraping on Immoscout24
+* Data cleaning
+* Create a data frame with all relevant data
+* Geocoding to get longitudes and latitudes for each observation using googleway package
+* Use of prediction models to determine predicted prices
+
+# 2. Our package
+## The swissimmo package
+
+* <b>get_immodata2()</b> : Web scrap Immoscout24 data by city and adding coordinates and predicted price
+```{r}
+cities <- get_immodata("crissier")
+#head(cities)
+```
+* <b>my_theme()</b> : Theme for ggplot graphs
+* <b>plot.pred()</b>: Plot the predictions against the real values
+* <b>predict_price()</b> : Create a new "pred" object with the predicted price
+```{r}
+#Predictions based on the cities dataframe
+predict_price(cities)
+```
+
+```{r}
+#Predictions based on the following attributes
+predict_price(rooms = 3, m2 = 59, city = "nyon")
+```
+* <b>summary.pred</b> : Extract the price of "pred" object
+
+# 3. Shiny App
+## Demonstration
+
+
+
 

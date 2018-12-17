@@ -93,11 +93,44 @@
       <h1 data-config-title><!-- populated from slide_config.json --></h1>
       <h2 data-config-subtitle><!-- populated from slide_config.json --></h2>
       <p data-config-presenter><!-- populated from slide_config.json --></p>
-            <p style="margin-top: 6px; margin-left: -2px;">11 décembre, 2018</p>
+            <p style="margin-top: 6px; margin-left: -2px;">17 décembre, 2018</p>
           </hgroup>
   </slide>
 
-<slide class="segue dark nobackground level1"><hgroup class = 'auto-fadein'><h2>Presentation</h2></hgroup><article  id="presentation"></article></slide>
+<slide class="segue dark nobackground level1"><hgroup class = 'auto-fadein'><h2>1. Our project</h2></hgroup><article  id="our-project">
+
+</article></slide><slide class=""><hgroup><h2>1.1 Objectives</h2></hgroup><article  id="objectives">
+
+<ul>
+<li>Create an interactive map of the Swiss real estate market</li>
+<li>Create a R package allowing users to web scrap updated real estate data on Immoscout24</li>
+</ul>
+
+</article></slide><slide class=""><hgroup><h2>1.2 Methodology</h2></hgroup><article  id="methodology">
+
+<ul>
+<li>Data web scraping on Immoscout24</li>
+<li>Data cleaning</li>
+<li>Create a data frame with all relevant data</li>
+<li>Geocoding to get longitudes and latitudes for each observation using googleway package</li>
+<li>Use of prediction models to determine predicted prices</li>
+</ul>
+
+</article></slide><slide class="segue dark nobackground level1"><hgroup class = 'auto-fadein'><h2>2. Our package</h2></hgroup><article  id="our-package">
+
+</article></slide><slide class=""><hgroup><h2>The swissimmo package</h2></hgroup><article  id="the-swissimmo-package">
+
+<ul>
+<li><b>get_immodata2()</b> : Web scrap Immoscout24 data by city and adding coordinates and predicted price</li>
+</ul>
+
+<pre class = 'prettyprint lang-r'>#cities &lt;- get_immodata(c(&quot;crissier&quot;, &quot;bussigny&quot;))
+#head(cities)</pre>
+
+<ul>
+<li><b>my_theme()</b> : Theme for ggplot graphs</li>
+<li><b>plot.pred()</b>:</li>
+</ul></article></slide>
 
 
   <slide class="backdrop"></slide>
