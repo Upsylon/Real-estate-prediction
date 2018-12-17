@@ -3,7 +3,7 @@ library(leaflet)
 
 ui <- shinyUI(fluidPage(
   leafletOutput("map"),
-  p(), #drity way of making space between map and button
+  p(), #dirty way of making space between map and button
   column(4,
          wellPanel(
            checkboxGroupInput("City", "City",
@@ -55,6 +55,7 @@ server <- function(input, output) {
       setMaxBounds(5.5, 48.2, 11, 45.3) %>%
       addTiles() # Add default OpenStreetMap map tiles
   })
+  
   
   observe({
     leafletProxy("map", data = filteredData()) %>%
