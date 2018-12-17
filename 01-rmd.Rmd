@@ -30,13 +30,14 @@ library(swissimmo)
 
 ## Objectives 
 
-The objectives of our project is to create an interactive map of the Swiss real estate market. The map is represented as a Shiny App. To have all the informations we have created our "swissimmo" package. The package is composed of different functions that helps users to get his data. All the data available on the App has been web scraped on Immoscout24. \
+The objectives of our project is to create an interactive map of the Swiss real estate market. The map is represented as a Shiny App. To get all the informations, we have created our "swissimmo" package. The package is composed of different functions that helps users to get all the relevant data. The data available on the App has been web scraped on Immoscout24. \
 Through the map, the user can select very precisely by setting the characterictics that he wants.\
 Moreover, we thought that it was nice to add a predictive model in order to predict the price of each property in order to compare it with the effective price.\
 
 ... what we want to achieve...
 
 ## Methodology
+
 
 ... How we achieve it... 
 
