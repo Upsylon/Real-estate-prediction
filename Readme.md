@@ -10,7 +10,7 @@ Based on the data available on the internet, one of the main goal of our project
 
 ### Video Presentation
 
-To begin with, it is possible to understand how our project works by looking [the following video](https://www.youtube.com/watch?v=hwB-TyIpzo0&t=104s) in which we make a presentation of our project.
+To begin with, it is possible to understand how our project works by looking [the following video](https://www.youtube.com/watch?v=hwB-TyIpzo0&t=1s) in which we make a presentation of our project.
 
 
 
