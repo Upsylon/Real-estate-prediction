@@ -8,6 +8,12 @@ This github repository has been created as part of the course *PROGRAMMING TOOLS
 This repository is complementary to the package *swissimmo* that we created and that contains several functions.  
 Based on the data available on the internet, one of the main goal of our project was to create an interactive map of the Swiss real estate market and to allow users to webscrap updated real estate data on Immoscout24. 
 
+### Video Presentation
+
+To begin with, it is possible to understand how our project works by looking [the following video](https://www.youtube.com/watch?v=hwB-TyIpzo0&t=104s) in which we make a presentation of our project.
+
+
+
 ## Methodology
 
 Given one or multiple cities of interest, we provide a function that allows the user to webscrap all housings currently available on immoscout24.ch. For given cities, on can retrieve the housings available for renting on this website, their characteristics and addresses.  
