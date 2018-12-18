@@ -36,12 +36,18 @@ The objectives of our project is to create an interactive map of the Swiss real 
 Through the map, the user can select very precisely by setting the characterictics that he wants.\
 Moreover, we thought that it was nice to add a predictive model in order to predict the price of each property in order to compare it with the effective price.
 
-... what we want to achieve...
-
 ## Methodology
 
+The procedure to get the objective above consists in several steps. 
+First, we had to get all the data from the Immoscout24.ch platform. To do so, we used a webscrapping method allowing us to download a raw dataset with all the information needed (address, size, rooms, price). Then, a big part of our work was to clean all this data, in order to get a usable set of information that we could work with properly. This part was a bit challenging since we had to undersand the formatting of the source website to extract only the right information. We finally created a data frame containing all our data in a proper way. 
 
-... How we achieve it... 
+Once all these first step were done, we had to find a way to get the GPS coordinates of each observation of our data frame, in order to get a proper map of our obersvations. To do so, we used googleway R package that allowed us to "geocode" all our observations based on each address. We finally completed our working data frame with all the coordinates corresponding to each observation.
+
+Then, to go further in our project, we decided to predict the prices of each home. We used a random forest predictive model, however, we let the choice to our user to choose the predicive he wants in our final package. We added these predicted prices in our final data set as well. 
+
+We finalized our project with a shiny app that includes all our observations in a map with a color code corresponding to the delta between the actual price and the predicted price.
+
+Finally, we decided to create a package that would include all the three first main steps above. An external user could then get a dataset with all the selling homes information, the coordinates and the predicted prices included in it. This package is called "swissimmo".
 
 # Modelling
 
