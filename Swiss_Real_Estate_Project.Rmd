@@ -9,6 +9,8 @@ output:
 runtime: shiny
 ---
 
+**PLEASE CLICK ON "Run Document" (above) TO HAVE A NICE DOCUMENT INCLUDING THE SHINY APP**
+
 ```{r message = FALSE, warning = FALSE, echo = FALSE}
 library(robotstxt)
 library(xml2)
@@ -249,6 +251,8 @@ ggplot() +
   xlab("Predicted values of the testing set") +
   ylab("Real value of the testing set") 
 ```
-Now, we now that the random forest is the model to choose and we can build a new one on the whole dataset. Of course, we have overfitting as we predict instances that we already know.
+\
+
+Now, we know that the random forest is the model to choose and we can build a new one on the whole dataset. Of course, we have overfitting as we predict instances that we already know.
 
 
