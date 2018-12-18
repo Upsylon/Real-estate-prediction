@@ -6,6 +6,7 @@ output:
   html_document:
     theme: cerulean
     highlight: tango
+runtime: shiny
 ---
 
 ```{r message = FALSE, warning = FALSE, echo = FALSE}
@@ -22,6 +23,7 @@ library(kableExtra)
 library(leaflet)
 library(caret)
 library(googleway)
+library(shiny)
 # devtools::install_github("vincentlomazzi/swissimmo")
 library(swissimmo)
 ```
@@ -160,6 +162,19 @@ all_cities <- readRDS(file = "all_cities.rds")
 
 # Shiny App
 
+The final step of our analysis is to have an interactive map of these data enabling us to apply multiple filter, to zoom to points of interest, and to represent the different housings and their characteristics.  
+The *swissmap* function allows us to call the shiny app using as an argument a dataframe which might result from our previous analysis.  
+As an example, we use the *all.cities* object that we presented before. 
+
+```{r, fig.height = 18, fig.width = 12}
+swissmap(all_cities)
+```
+
+
+# Conclusion
+
+Following our analysis, one can have a broader view of the real estate market in Switzerland. Using the available functions it is possible for the user to get the housings available for any city in Switzerland.  
+We also provide tools to forecast the market price of a housing based on its characteristics to estimated if it is rented at a good price. Finally, it is possible to plot all observations on an interactive map to be able to find the place of your dreams! 
 
 
 
