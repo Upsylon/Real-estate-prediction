@@ -12,22 +12,10 @@ runtime: shiny
 **PLEASE CLICK ON "Run Document" (above) TO HAVE A NICE DOCUMENT INCLUDING THE SHINY APP**
 
 ```{r message = FALSE, warning = FALSE, echo = FALSE}
-library(robotstxt)
-library(xml2)
-library(rvest)
-library(magrittr)
-library(stringr)
-library(dplyr)
-library(plotly)
-library(ggmap)
-library(googleway)
-library(kableExtra)
-library(leaflet)
-library(caret)
-library(googleway)
-library(shiny)
 # devtools::install_github("vincentlomazzi/swissimmo")
 library(swissimmo)
+library(magrittr)
+library(kableExtra)
 ```
 
 # Introduction

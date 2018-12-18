@@ -15,7 +15,7 @@ library(dplyr)
 library(kableExtra)
 library(lattice)
 library(ggplot2)
-set_key("AIzaSyBQd93y1YsbrWKxMgnaRXoX0Wg6F-fiCqc")
+set_key("...") # the API provided by google 
 ```
 
 
