@@ -47,10 +47,10 @@ Before beginning anything, we have to make sure that we are respecting the utili
 Therefore, we look if the path to which we will web scrap the data is allowed by the website.
 
 ```{r}
-paths_allowed(paths = "/en/real-estate/rent/city/",
+robotstxt::paths_allowed(paths = "/en/real-estate/rent/city/",
               domain = "https://www.immoscout24.ch")
 
-# get_robotstxt(domain = "https://www.immoscout24.ch")
+# robotstxt::get_robotstxt(domain = "https://www.immoscout24.ch")
 ```
 
 We see that the path is allowed and not restricted in the robots.txt of the website. We can begin our analysis.
@@ -136,8 +136,8 @@ In order to be able to retrieve these points of interest, the function incorpora
 It is possible to click on the different points or to brush many at the same time to retrieve their informations. The pop-up window gives main informations about the good (price, estimed price, adress, etc).
 This function has to be runned directly in the console to work efficiently as it uses a ShinyApp.
 
-```{r, eval = FALSE}
-plot(predictions) # to be ran in the console
+```{r}
+plot(predictions) 
 ```
 
 The next step of our process will be to use the different data that we recorded till here and to plot each housing with their different characteristics on an interactive map of Switzerland. To do this, we would need the geographical coordinates (longitude and latitude) of each housing.  
