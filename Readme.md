@@ -5,7 +5,7 @@ Luca Bron, David Germano, Patrik Grandadam, Vincent Lomazzi, Edgar Raisin
 ## Introduction
 
 This github repository has been created as part of the course *PROGRAMMING TOOLS IN DATA SCIENCE* given by S.Orso and I.Rudnytskyi. More precisely, it consists of our semester project has as main goal to present some tools that we have learned in this class.  
-This repository is complementary to the package *swissimmo* that we created and that contains several functions.  
+This repository is complementary to the package [*swissimmo*](https://github.com/Upsylon/swissimmo) that we created and that contains several functions.  
 Based on the data available on the internet, one of the main goal of our project was to create an interactive map of the Swiss real estate market and to allow users to webscrap updated real estate data on Immoscout24. 
 
 ### Video Presentation
@@ -16,8 +16,8 @@ To begin with, it is possible to understand how our project works by looking [th
 
 ## Methodology
 
-Given one or multiple cities of interest, we provide a function that allows the user to webscrap all housings currently available on immoscout24.ch. For given cities, on can retrieve the housings available for renting on this website, their characteristics and addresses.  
-Based on the prices observed on the market according to the characteristics of the housings, a prediction model can be built to predict the "real prices" at which the housings are estimated.  
+Given one or multiple cities of interest, we provide a function that allows the user to **webscrap** all housings currently available on immoscout24.ch. For given cities, on can retrieve the housings available for renting on this website, their characteristics and addresses.  
+Based on the prices observed on the market according to the characteristics of the housings, a **Machine Learning prediction model** is built to estimate the market prices of the different housings.  
 Finally, one can use an interactive *ShinyApp* to visualize all the housings on a map, filter the data according to some criterion, and even see  which housings are over-estimated or under-estimated. 
 
 ## Main references
