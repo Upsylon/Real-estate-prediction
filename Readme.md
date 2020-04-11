@@ -18,7 +18,7 @@ To begin with, it is possible to understand how our project works by looking [th
 
 Given one or multiple cities of interest, we provide a function that allows the user to **webscrap** all housings currently available on immoscout24.ch. For given cities, on can retrieve the housings available for renting on this website, their characteristics and addresses.  
 Based on the prices observed on the market according to the characteristics of the housings, a **Machine Learning prediction model** is built to estimate the market prices of the different housings.  
-Finally, one can use an interactive *ShinyApp* to visualize all the housings on a map, filter the data according to some criterion, and even see  which housings are over-estimated or under-estimated. 
+Finally, one can use an interactive *ShinyApp* to visualize all the housings on a map, filter the data according to some criterion, and see  which housings are over-estimated or under-estimated. 
 
 ## Main references
 
